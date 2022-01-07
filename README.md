@@ -51,7 +51,7 @@ assert.ok(result_2.ok);
 ### Handle list
 ```js
 const scenario_3 = clix('my command')
-  .expect([ // Handle multiple line with arrays
+  .expect([ // Handle multiple lines with arrays
     'What is your choice?',
     /a/,
     /b/
