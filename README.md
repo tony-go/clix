@@ -31,7 +31,7 @@ import clix from '@tonygo/clix';
 const scenario_1 = clix('my command')
   .expect('Hey user, what is your name?')
   .input('tony')
-  .expect('Super!');
+  .expect('Super!', { timeout: 3000 });
 
 const result_1 = await scenario_1.run();
 assert.ok(result_1.ok);
@@ -42,7 +42,7 @@ assert.ok(result_1.ok);
 const scenario_2 = clix('my command')
   .expect('Hey user, what is your name?')
   .input(223)
-  .expectFailure('Sorry, dude!');
+  .expectError('Sorry, dude!', { code: 1 });
 
 const result_2 = await scenario_2.run();
 assert.ok(result_2.ok);
@@ -72,19 +72,32 @@ assert.ok(result_2.ok);
 Start a clix scenario with `clix('my command')`;
 
 Options:
-```js
+```ts
 interface ClixOptions {
   timeout: number;
-};
+}
 ```
 
-### **scenario.expect(line: string | Regexp): Clix**
+### **scenario.expect(line: string | Regexp, options?: ExpectOptions): Clix**
 
-Assert that the output is strictly equal and returns the Clix instance.
+Assert that the output (stdout) is strictly equal and returns the Clix instance.
 
-### **scenario.expectFailure(errorMessage: string | Regexp): Clix**
+```ts
+interface ExpectOptions {
+  timeout?: number;
+}
+```
 
-Assert that the CLI exit with an error message and returns the Clix instance
+### **scenario.expectError(errorMessage: string | Regexp, options?: ExpectErrorOptions): Clix**
+
+Assert that the output (stderr) is strictly equal and returns the Clix instance.
+
+```ts
+interface ExpectErrorOptions {
+  code?: number;
+  timeout?: number;
+}
+```
 
 ### **scenario.input(input: string): Clix**
 
@@ -108,10 +121,10 @@ The `ClixResult` object stand for:
 interface ClixResult {
   ok: boolean;
   val: {
-    expected: string | number,
-    actual: string
+    expected: string | number;
+    actual: string;
   };
-};
+}
 ```
 
 
