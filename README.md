@@ -51,9 +51,11 @@ assert.ok(result_2.ok);
 ### Handle list
 ```js
 const scenario_3 = clix('my command')
-  .expect('What is your choice?')
-  .expect(/a/)
-  .expect(/b/)
+  .expect([ // Handle multiple line with arrays
+    'What is your choice?',
+    /a/,
+    /b/
+  ])
   .select([1]) // using an array for multiple choices
   .expect('Ok, dude!');
 
@@ -78,9 +80,9 @@ interface ClixOptions {
 }
 ```
 
-### **scenario.expect(line: string | Regexp, options?: ExpectOptions): Clix**
+### **scenario.expect(line: string | Regexp | (string | Regexp)[], options?: ExpectOptions): Clix**
 
-Assert that the output (stdout) is strictly equal and returns the Clix instance.
+Assert that the output line (stdout) is strictly equal and returns the Clix instance.
 
 ```ts
 interface ExpectOptions {
@@ -88,9 +90,9 @@ interface ExpectOptions {
 }
 ```
 
-### **scenario.expectError(errorMessage: string | Regexp, options?: ExpectErrorOptions): Clix**
+### **scenario.expectError(errorMessage: string | Regexp | (string | Regexp)[], options?: ExpectErrorOptions): Clix**
 
-Assert that the output (stderr) is strictly equal and returns the Clix instance.
+Assert that the output line (stderr) is strictly equal and returns the Clix instance.
 
 ```ts
 interface ExpectErrorOptions {
