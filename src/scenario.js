@@ -9,15 +9,10 @@ export class Scenario {
   expect(value) {
     if (typeof value === 'string') {
       this.#addExpectStep(value);
-      return this;
-    }
-
-    if (Array.isArray(value)) {
+    } else if (Array.isArray(value)) {
       for (const step of value) {
         this.#addExpectStep(step);
       }
-
-      return this;
     }
 
     return this;
@@ -25,6 +20,23 @@ export class Scenario {
 
   #addExpectStep(value) {
     const step = { value, type: 'expect' };
+    this.steps.push(step);
+  }
+
+  input(value) {
+    if (typeof value === 'string') {
+      this.#addInputStep(value);
+    } else if (Array.isArray(value)) {
+      for (const input of value) {
+        this.#addInputStep(input);
+      }
+    }
+
+    return this;
+  }
+
+  #addInputStep(value) {
+    const step = { value, type: 'input' };
     this.steps.push(step);
   }
 }

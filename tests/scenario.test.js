@@ -32,3 +32,34 @@ test('it should allow chaining with expect method', (t) => {
   t.true(scenario instanceof Scenario);
   t.end();
 });
+
+test('it should expose an input function to add an expected value', (t) => {
+  const scenario = clix('foo bar');
+  const inputValue = 'hey';
+
+  scenario.input(inputValue);
+
+  t.deepEqual(scenario.steps, [{ value: inputValue, type: 'input' }]);
+  t.end();
+});
+
+test('it should expose an expect function to add an several expected Values', (t) => {
+  const scenario = clix('foo bar');
+  const inputA = 'hey';
+  const inputB = 'yo';
+
+  scenario.input([inputA, inputB]);
+
+  t.deepEqual(scenario.steps, [
+    { value: inputA, type: 'input' },
+    { value: inputB, type: 'input' },
+  ]);
+  t.end();
+});
+
+test('it should allow chaining with input method', (t) => {
+  const scenario = clix('foo bar').input('yo').input('foo');
+
+  t.true(scenario instanceof Scenario);
+  t.end();
+});
