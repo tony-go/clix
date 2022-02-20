@@ -32,14 +32,13 @@ test(
   'it should assert the expect value passed',
   { timeout: 2000 },
   async (t) => {
-    const scenario = clix(kValidCommand).expect('Hello, who am I talking to?');
+    const expectedValue = 'Hello, who am I talking to?';
+    const scenario = clix(kValidCommand).expect(expectedValue);
 
-    const res = await scenario.run();
+    const { ok, steps } = await scenario.run();
 
-    t.true(res.ok);
-    t.deepEqual(res.steps, [
-      { value: 'Hello, who am I talking to?', type: 'expect', ok: true },
-    ]);
+    t.true(ok);
+    t.deepEqual(steps, [{ value: expectedValue, type: 'expect', ok: true }]);
     t.end();
   }
 );
