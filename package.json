@@ -29,6 +29,11 @@
     "eslint": "^8.9.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "tape": "^5.5.2"
+    "tape": "^5.5.2",
+    "tinyspy": "^0.3.0"
+  },
+  "dependencies": {
+    "cross-spawn": "^7.0.3",
+    "split2": "^4.1.0"
   }
 }
