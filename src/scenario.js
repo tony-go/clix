@@ -8,7 +8,7 @@ import splitByLine from 'split2';
 import { Debug } from './debug.js';
 
 // constants
-const kGlobalTimeout = 1000;
+const kGlobalTimeout = 500;
 
 export class Scenario extends Debug {
   #command;
