@@ -9,10 +9,11 @@ import { spyOn } from 'tinyspy';
 import clix from '../src/index.js';
 
 // constants
-const kValidCommand = 'bash ./tests/fixtures/simple.sh';
+const kSimpleOutputCommand = 'bash ./tests/fixtures/simple.sh';
+const kSimpleCommandWithOutput = 'bash ./tests/fixtures/simple-with-input.sh';
 
 test('it should expose a run method', (t) => {
-  const scenario = clix(kValidCommand);
+  const scenario = clix(kSimpleOutputCommand);
 
   t.ok(scenario.run);
   t.end();
@@ -20,7 +21,9 @@ test('it should expose a run method', (t) => {
 
 test('it should spawn a process when run is called', async (t) => {
   const spawnSpy = spyOn(cp, 'spawn');
-  const scenario = clix(kValidCommand).expect('Hello, who am I talking to?');
+  const scenario = clix(kSimpleOutputCommand).expect(
+    'Hello, who am I talking to?'
+  );
 
   scenario.run();
 
@@ -28,17 +31,27 @@ test('it should spawn a process when run is called', async (t) => {
   t.end();
 });
 
-test(
-  'it should assert the expect value passed',
-  { timeout: 2000 },
-  async (t) => {
-    const expectedValue = 'Hello, who am I talking to?';
-    const scenario = clix(kValidCommand).expect(expectedValue);
+test('it should assert the expect value passed', async (t) => {
+  const expectedValue = 'Hello, who am I talking to?';
+  const scenario = clix(kSimpleOutputCommand).expect(expectedValue);
 
-    const { ok, steps } = await scenario.run();
+  const { ok, steps } = await scenario.run();
 
-    t.true(ok);
-    t.deepEqual(steps, [{ value: expectedValue, type: 'expect', ok: true }]);
-    t.end();
-  }
-);
+  t.true(ok);
+  t.deepEqual(steps, [{ value: expectedValue, type: 'expect', ok: true }]);
+  t.end();
+});
+
+test('it should write input value passed', async (t) => {
+  const name = 'tony';
+  const scenario = clix(kSimpleCommandWithOutput)
+    .expect('Hello, who am I talking to?')
+    .input(name)
+    .expect(`Hey ${name}!`);
+
+  const { ok, steps } = await scenario.run();
+
+  t.true(ok);
+  t.true(steps.every((step) => step.ok));
+  t.end();
+});

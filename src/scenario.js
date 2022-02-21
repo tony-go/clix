@@ -63,7 +63,7 @@ export class Scenario extends Debug {
   async run() {
     await this.#spawnCommand();
 
-    for (const res of this.#checkNextLine()) {
+    for await (const res of this.#checkNextLine()) {
       this.debug('step =>', res);
     }
 
@@ -74,21 +74,46 @@ export class Scenario extends Debug {
     return { ok: this.steps.every((step) => step.ok), steps: this.steps };
   }
 
-  *#checkNextLine() {
+  async *#checkNextLine() {
     // TODO(tony): check if proc is on activity
-    const currentStep = this.steps[this.#stepPointer];
+    while (this.#stepPointer < this.steps.length) {
+      const currentStep = this.steps[this.#stepPointer];
 
-    // if (!currentStep || this.currentStep >= this.steps.length) return;
+      switch (currentStep.type) {
+        case 'expect': {
+          const bufferValue = this.#buffer.out.shift();
 
-    if (currentStep.type === 'expect') {
-      const bufferValue = this.#buffer.out.shift();
+          this.debug('equal', bufferValue, currentStep.value);
+          const areValuesEqual = bufferValue === currentStep.value;
+          currentStep.ok = areValuesEqual ? true : false;
 
-      const areValuesEqual = bufferValue === currentStep.value;
-      currentStep.ok = areValuesEqual ? true : false;
+          this.#next();
+          yield currentStep;
+          break;
+        }
+        case 'input': {
+          this.#writeInProc(currentStep.value);
 
-      this.#next();
-      yield currentStep;
+          currentStep.ok = true;
+          this.#next();
+
+          // await for next input (timer);
+          await new Promise((resolve) => this.#pipe(resolve));
+
+          yield currentStep;
+          break;
+        }
+        default: {
+          throw new Error(`step ${currentStep.type} doesn't exist`);
+        }
+      }
     }
+  }
+
+  #writeInProc(value) {
+    this.#proc.stdin.setEncoding('utf-8');
+    this.#proc.stdin.write(value);
+    this.#proc.stdin.end();
   }
 
   #next() {
@@ -102,17 +127,19 @@ export class Scenario extends Debug {
       });
 
       proc.on('spawn', () => {
+        this.debug('spawn');
         this.#proc = proc;
         this.#pipe(resolve);
       });
     });
   }
 
-  async #pipe(resolve) {
+  #pipe(resolve) {
     let timer = setTimeout(resolve, this.#globalTimeout);
 
     this.#proc.stdout.pipe(splitByLine()).on('data', (line) => {
       clearTimeout(timer);
+      this.debug('piped line ->', line);
       this.#buffer.out.push(line);
       timer = setTimeout(resolve, this.#globalTimeout);
     });
