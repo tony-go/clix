@@ -11,13 +11,40 @@ import { Debug } from './debug.js';
 const kGlobalTimeout = 500;
 
 export class Scenario extends Debug {
+  /**
+   * @type {string}
+   * @description the command to run
+   */
   #command;
+
+  /**
+   * @type {ChildProcess}
+   * @description current child process running the command
+   */
   #proc;
+
+  /**
+   * @type {number}
+   * @description default timeout
+   */
   #globalTimeout = kGlobalTimeout;
+
+  /**
+   * @typedef OutputBuffer
+   * @type {object}
+   * @property {Array.<string>} out - all stdout lines
+   * @property {Array.<string>} err - all stderr lines
+   * @description contains outputs from child process
+   */
   #buffer = {
     out: [],
     err: [],
   };
+
+  /**
+   * @type {number}
+   * @description index of the current step
+   */
   #stepPointer = 0;
 
   constructor(command) {
