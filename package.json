@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "test": "tape 'tests/**/*.test.js'",
+    "test:unit": "tape 'tests/**/*.test.js'",
+    "test:functional": "tape 'tests/**/*.spec.js'",
     "lint": "eslint ./src"
   },
   "repository": {

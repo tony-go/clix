@@ -21,7 +21,12 @@ jobs:
     - run: npm i
       env:
         CI: true
-    - run: npm run test
+    - run: npm run test:unit
+      name: Run unit tests
+      env:
+        CI: true
+    - run: npm run test:functional
+      name: Run functional tests
       env:
         CI: true
       
