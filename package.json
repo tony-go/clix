@@ -7,6 +7,7 @@
   "scripts": {
     "test:unit": "tape 'tests/**/*.spec.js'",
     "test:functional": "tape 'tests/**/*.test.js'",
+    "test:all": "npm run test:unit && npm run test:functional",
     "lint": "eslint ./src"
   },
   "repository": {

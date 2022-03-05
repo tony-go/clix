@@ -87,6 +87,27 @@ export class Scenario extends Debug {
     this.steps.push(step);
   }
 
+  expectError(error) {
+    if (Array.isArray(error)) {
+      for (const err of error) {
+        this.#addExpectErrorStep(err);
+      }
+    } else {
+      this.#addExpectErrorStep(error);
+    }
+  }
+
+  #addExpectErrorStep(error) {
+    if (typeof error === 'string') {
+      this.steps.push({
+        value: error,
+        type: 'expect-error',
+      });
+    } else if (error.value) {
+      this.steps.push({ ...error, type: 'expect-error' });
+    }
+  }
+
   async run() {
     await this.#spawnCommand();
 
@@ -166,8 +187,15 @@ export class Scenario extends Debug {
 
     this.#proc.stdout.pipe(splitByLine()).on('data', (line) => {
       clearTimeout(timer);
-      this.debug('piped line ->', line);
+      this.debug('piped stdout line ->', line);
       this.#buffer.out.push(line);
+      timer = setTimeout(resolve, this.#globalTimeout);
+    });
+
+    this.#proc.stderr.pipe(splitByLine()).on('data', (line) => {
+      clearTimeout(timer);
+      this.debug('piped stderr line ->', line);
+      this.#buffer.err.push(line);
       timer = setTimeout(resolve, this.#globalTimeout);
     });
   }
