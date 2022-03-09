@@ -57,6 +57,13 @@ test('it should expose an expect function to add an several expected Values', (t
   t.end();
 });
 
+test('it should allow chaining with input method', (t) => {
+  const scenario = clix('foo bar').input('yo').input('foo');
+
+  t.true(scenario instanceof Scenario);
+  t.end();
+});
+
 test('it should expose an expectError function to add expected errors', (t) => {
   const scenario = clix('foo bar');
 
@@ -111,7 +118,7 @@ test('it expectError could take an array of object', (t) => {
 });
 
 test('it should allow chaining with input method', (t) => {
-  const scenario = clix('foo bar').input('yo').input('foo');
+  const scenario = clix('foo bar').expectError('yo').expectError('foo');
 
   t.true(scenario instanceof Scenario);
   t.end();

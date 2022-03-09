@@ -95,6 +95,8 @@ export class Scenario extends Debug {
     } else {
       this.#addExpectErrorStep(error);
     }
+
+    return this;
   }
 
   #addExpectErrorStep(error) {
@@ -130,6 +132,17 @@ export class Scenario extends Debug {
       switch (currentStep.type) {
         case 'expect': {
           const bufferValue = this.#buffer.out.shift();
+
+          this.debug('equal', bufferValue, currentStep.value);
+          const areValuesEqual = bufferValue === currentStep.value;
+          currentStep.ok = areValuesEqual ? true : false;
+
+          this.#next();
+          yield currentStep;
+          break;
+        }
+        case 'expect-error': {
+          const bufferValue = this.#buffer.err.shift();
 
           this.debug('equal', bufferValue, currentStep.value);
           const areValuesEqual = bufferValue === currentStep.value;
@@ -175,7 +188,7 @@ export class Scenario extends Debug {
       });
 
       proc.on('spawn', () => {
-        this.debug('spawn');
+        this.debug('spawn, pid:', proc.pid);
         this.#proc = proc;
         this.#pipe(resolve);
       });

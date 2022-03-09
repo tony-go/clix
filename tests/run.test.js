@@ -11,6 +11,7 @@ import clix from '../src/index.js';
 // constants
 const kSimpleOutputCommand = 'bash ./tests/fixtures/simple.sh';
 const kSimpleCommandWithOutput = 'bash ./tests/fixtures/simple-with-input.sh';
+const kReturnError = 'bash ./tests/fixtures/return-error.sh';
 
 test('it should expose a run method', (t) => {
   const scenario = clix(kSimpleOutputCommand);
@@ -48,6 +49,19 @@ test('it should write input value passed', async (t) => {
     .expect('Hello, who am I talking to?')
     .input(name)
     .expect(`Hey ${name}!`);
+
+  const { ok, steps } = await scenario.run();
+
+  t.true(ok);
+  t.true(steps.every((step) => step.ok));
+  t.end();
+});
+
+test('it should assert error message', async (t) => {
+  const scenario = clix(kReturnError)
+    .expect('Hello, who am I talking to?')
+    .input('tony')
+    .expectError('error');
 
   const { ok, steps } = await scenario.run();
 
