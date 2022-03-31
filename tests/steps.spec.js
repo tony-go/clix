@@ -64,7 +64,7 @@ test('it should allow chaining with input method', (t) => {
   t.end();
 });
 
-test('it should expose an expectError function to add expected errors', (t) => {
+test('it expectError function could add expected errors', (t) => {
   const scenario = clix('foo bar');
 
   const error = 'error';
@@ -76,16 +76,6 @@ test('it should expose an expectError function to add expected errors', (t) => {
       type: 'expect-error',
     },
   ]);
-  t.end();
-});
-
-test('it expectError could take an object with value and code', (t) => {
-  const scenario = clix('foo bar');
-
-  const errorObject = { value: 'error', code: 1 };
-  scenario.expectError(errorObject);
-
-  t.deepEqual(scenario.steps, [{ ...errorObject, type: 'expect-error' }]);
   t.end();
 });
 
@@ -103,23 +93,39 @@ test('it expectError could take an array of string', (t) => {
   t.end();
 });
 
-test('it expectError could take an array of object', (t) => {
-  const scenario = clix('foo bar');
-  const errorA = { value: 'boom' };
-  const errorB = { value: 'paf', code: 2 };
-
-  scenario.expectError([errorA, errorB]);
-
-  t.deepEqual(scenario.steps, [
-    { ...errorA, type: 'expect-error' },
-    { ...errorB, type: 'expect-error' },
-  ]);
-  t.end();
-});
-
 test('it should allow chaining with input method', (t) => {
   const scenario = clix('foo bar').expectError('yo').expectError('foo');
 
   t.true(scenario instanceof Scenario);
+  t.end();
+});
+
+test('it withError function could add an expected error code', (t) => {
+  const scenario = clix('foo bar');
+
+  const code = 1;
+  const errorText = 'yo';
+  scenario.expectError(errorText).withCode(code);
+
+  const lastStep = scenario.steps.at(-1);
+  t.deepEqual(lastStep, {
+    value: code,
+    type: 'expect-error-code',
+  });
+  t.end();
+});
+
+test('it should allow chaining with input method', (t) => {
+  const scenario = clix('foo bar').expectError('yo').withCode(2);
+
+  t.true(scenario instanceof Scenario);
+  t.end();
+});
+
+test('it should throw an error when withCode is not called after an expectError', (t) => {
+  t.throws(
+    () => clix('foo bar').expect('yo').withCode(2),
+    new Error('.withCode should called after .expectError')
+  );
   t.end();
 });

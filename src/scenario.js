@@ -1,7 +1,5 @@
-// node.js dependencies
-import spawn from 'cross-spawn';
-
 // third-party dependencies
+import spawn from 'cross-spawn';
 import splitByLine from 'split2';
 
 // internal dependencies
@@ -39,6 +37,7 @@ export class Scenario extends Debug {
   #buffer = {
     out: [],
     err: [],
+    code: null,
   };
 
   /**
@@ -99,15 +98,24 @@ export class Scenario extends Debug {
     return this;
   }
 
-  #addExpectErrorStep(error) {
-    if (typeof error === 'string') {
-      this.steps.push({
-        value: error,
-        type: 'expect-error',
-      });
-    } else if (error.value) {
-      this.steps.push({ ...error, type: 'expect-error' });
+  #addExpectErrorStep(value) {
+    const errorStep = { value, type: 'expect-error' };
+    this.steps.push(errorStep);
+  }
+
+  withCode(code) {
+    const previousStep = this.steps.at(-1);
+
+    // todo(tony): it should be possible to expect an error code
+    // without the error text
+    if (!previousStep || previousStep.type !== 'expect-error') {
+      throw new Error('.withCode should called after .expectError');
     }
+
+    const step = { value: code, type: 'expect-error-code' };
+    this.steps.push(step);
+
+    return this;
   }
 
   async run() {
@@ -135,6 +143,17 @@ export class Scenario extends Debug {
 
           this.debug('equal', bufferValue, currentStep.value);
           const areValuesEqual = bufferValue === currentStep.value;
+          currentStep.ok = areValuesEqual ? true : false;
+
+          this.#next();
+          yield currentStep;
+          break;
+        }
+        case 'expect-error-code': {
+          const expectedCode = this.#buffer.code;
+
+          this.debug('equal', expectedCode, currentStep.value);
+          const areValuesEqual = expectedCode === currentStep.value;
           currentStep.ok = areValuesEqual ? true : false;
 
           this.#next();
@@ -191,6 +210,10 @@ export class Scenario extends Debug {
         this.debug('spawn, pid:', proc.pid);
         this.#proc = proc;
         this.#pipe(resolve);
+      });
+
+      proc.on('exit', (code) => {
+        this.#buffer.code = code;
       });
     });
   }
