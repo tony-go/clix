@@ -141,6 +141,7 @@ export class Scenario extends Debug {
           yield currentStep;
           break;
         }
+        // TODO(tony) move to 'exit-code'
         case 'expect-error-code': {
           const expectedCode = this.#buffer.code;
 

@@ -123,15 +123,18 @@ The `ClixResult` object stand for:
 ```ts
 interface ClixResult {
   ok: boolean
-  steps: []Step
-  failed_step?: {
-    expected: string | number;
-    actual: string;
-  };
+  steps: {
+    all: () => []Step
+    last: () => Step
+    first: () => Step
+  }
 }
 
-interface Step {
-  // todo(tony): add types
+type StepEvent = 'expect' | 'expect-error' | 'exit-code' | 'input';
+interface Step<Value> {
+  type: StepEven;
+  val: Value;
+  ok: boolean;
 }
 ```
 
