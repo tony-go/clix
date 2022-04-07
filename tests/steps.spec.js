@@ -1,4 +1,4 @@
-import test from 'tape';
+import { test } from 'tap';
 
 import clix, { Scenario } from '../src/index.js';
 
@@ -8,7 +8,7 @@ test('it should expose an expect function to add an expected value', (t) => {
 
   scenario.expect(expectedValue);
 
-  t.deepEqual(scenario.steps, [{ value: expectedValue, type: 'expect' }]);
+  t.same(scenario.steps, [{ value: expectedValue, type: 'expect' }]);
   t.end();
 });
 
@@ -19,7 +19,7 @@ test('it should expose an expect function to add an several expected Values', (t
 
   scenario.expect([valueA, valueB]);
 
-  t.deepEqual(scenario.steps, [
+  t.same(scenario.steps, [
     { value: valueA, type: 'expect' },
     { value: valueB, type: 'expect' },
   ]);
@@ -29,7 +29,7 @@ test('it should expose an expect function to add an several expected Values', (t
 test('it should allow chaining with expect method', (t) => {
   const scenario = clix('foo bar').expect('yo').expect('foo');
 
-  t.true(scenario instanceof Scenario);
+  t.ok(scenario instanceof Scenario);
   t.end();
 });
 
@@ -39,7 +39,7 @@ test('it should expose an input function to add an expected value', (t) => {
 
   scenario.input(inputValue);
 
-  t.deepEqual(scenario.steps, [{ value: inputValue, type: 'input' }]);
+  t.same(scenario.steps, [{ value: inputValue, type: 'input' }]);
   t.end();
 });
 
@@ -50,7 +50,7 @@ test('it should expose an expect function to add an several expected Values', (t
 
   scenario.input([inputA, inputB]);
 
-  t.deepEqual(scenario.steps, [
+  t.same(scenario.steps, [
     { value: inputA, type: 'input' },
     { value: inputB, type: 'input' },
   ]);
@@ -60,7 +60,7 @@ test('it should expose an expect function to add an several expected Values', (t
 test('it should allow chaining with input method', (t) => {
   const scenario = clix('foo bar').input('yo').input('foo');
 
-  t.true(scenario instanceof Scenario);
+  t.ok(scenario instanceof Scenario);
   t.end();
 });
 
@@ -70,7 +70,7 @@ test('it expectError function could add expected errors', (t) => {
   const error = 'error';
   scenario.expectError(error);
 
-  t.deepEqual(scenario.steps, [
+  t.same(scenario.steps, [
     {
       value: error,
       type: 'expect-error',
@@ -86,7 +86,7 @@ test('it expectError could take an array of string', (t) => {
 
   scenario.expectError([errorA, errorB]);
 
-  t.deepEqual(scenario.steps, [
+  t.same(scenario.steps, [
     { value: errorA, type: 'expect-error' },
     { value: errorB, type: 'expect-error' },
   ]);
@@ -96,7 +96,7 @@ test('it expectError could take an array of string', (t) => {
 test('it should allow chaining with input method', (t) => {
   const scenario = clix('foo bar').expectError('yo').expectError('foo');
 
-  t.true(scenario instanceof Scenario);
+  t.ok(scenario instanceof Scenario);
   t.end();
 });
 
@@ -108,7 +108,7 @@ test('it withError function could add an expected error code', (t) => {
   scenario.expectError(errorText).withCode(code);
 
   const lastStep = scenario.steps.at(-1);
-  t.deepEqual(lastStep, {
+  t.same(lastStep, {
     value: code,
     type: 'expect-error-code',
   });
@@ -118,7 +118,7 @@ test('it withError function could add an expected error code', (t) => {
 test('it should allow chaining with input method', (t) => {
   const scenario = clix('foo bar').expectError('yo').withCode(2);
 
-  t.true(scenario instanceof Scenario);
+  t.ok(scenario instanceof Scenario);
   t.end();
 });
 
@@ -128,7 +128,7 @@ test('it should be possible to call withCode after an expect', (t) => {
   const scenario = clix('foo bar').expect('yo').withCode(code);
 
   const lastStep = scenario.steps.at(-1);
-  t.deepEqual(lastStep, {
+  t.same(lastStep, {
     value: code,
     type: 'expect-error-code',
   });

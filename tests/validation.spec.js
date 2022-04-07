@@ -1,9 +1,9 @@
-import test from 'tape';
+import { test } from 'tap';
 
 import clix, { Scenario } from '../src/index.js';
 
 test('it should expose a function', (t) => {
-  t.true(clix instanceof Function);
+  t.ok(clix instanceof Function);
   t.end();
 });
 
@@ -39,6 +39,6 @@ test('it should return a Scenario instance if command type is valid', (t) => {
 
   const res = clix(validCommand);
 
-  t.true(res instanceof Scenario);
+  t.ok(res instanceof Scenario);
   t.end();
 });

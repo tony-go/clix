@@ -2,7 +2,7 @@
 import cp from 'child_process';
 
 // third-party dependencies
-import test from 'tape';
+import { test } from 'tap';
 import { spyOn } from 'tinyspy';
 
 // internal dependencies
@@ -29,7 +29,7 @@ test('it should spawn a process when run is called', async (t) => {
 
   scenario.run();
 
-  t.true(spawnSpy.called);
+  t.ok(spawnSpy.called);
   t.end();
 });
 
@@ -39,8 +39,8 @@ test('it should assert the expect value passed', async (t) => {
 
   const { ok, steps } = await scenario.run();
 
-  t.true(ok);
-  t.deepEqual(steps, [{ value: expectedValue, type: 'expect', ok: true }]);
+  t.ok(ok);
+  t.same(steps, [{ value: expectedValue, type: 'expect', ok: true }]);
   t.end();
 });
 
@@ -53,8 +53,8 @@ test('it should write input value passed', async (t) => {
 
   const { ok, steps } = await scenario.run();
 
-  t.true(ok);
-  t.true(steps.every((step) => step.ok));
+  t.ok(ok);
+  t.ok(steps.every((step) => step.ok));
   t.end();
 });
 
@@ -66,8 +66,8 @@ test('it should assert error message', async (t) => {
 
   const { ok, steps } = await scenario.run();
 
-  t.true(ok);
-  t.true(steps.every((step) => step.ok));
+  t.ok(ok);
+  t.ok(steps.every((step) => step.ok));
   t.end();
 });
 
@@ -80,8 +80,8 @@ test('it should assert error message and the error message', async (t) => {
 
   const { ok, steps } = await scenario.run();
 
-  t.true(ok);
-  t.true(steps.every((step) => step.ok));
+  t.ok(ok);
+  t.ok(steps.every((step) => step.ok));
   t.end();
 });
 
@@ -97,7 +97,7 @@ test('it should assert exit code without error message', async (t) => {
 
   const { ok, steps } = await scenario.run();
 
-  t.true(ok);
-  t.true(steps.every((step) => step.ok));
+  t.ok(ok);
+  t.ok(steps.every((step) => step.ok));
   t.end();
 });

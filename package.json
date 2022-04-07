@@ -5,9 +5,10 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "test:unit": "tape 'tests/**/*.spec.js'",
-    "test:functional": "tape 'tests/**/*.test.js'",
-    "test:all": "npm run test:unit && npm run test:functional",
+    "test:unit": "tap --no-coverage 'tests/**/*.spec.js'",
+    "test:unit:watch": "tap --watch --no-coverage-report 'tests/**/*.spec.js'",
+    "test:functional": "tap --no-coverage 'tests/**/*.test.js'",
+    "test:all": "tap --no-coverage 'tests/**/*.js'",
     "lint": "eslint ./src"
   },
   "repository": {
@@ -31,11 +32,14 @@
     "eslint": "^8.9.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "tape": "^5.5.2",
+    "tap": "^16.0.1",
     "tinyspy": "^0.3.0"
   },
   "dependencies": {
     "cross-spawn": "^7.0.3",
     "split2": "^4.1.0"
+  },
+  "tap": {
+    "check-coverage": false
   }
 }
