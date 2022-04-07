@@ -104,14 +104,6 @@ export class Scenario extends Debug {
   }
 
   withCode(code) {
-    const previousStep = this.steps.at(-1);
-
-    // todo(tony): it should be possible to expect an error code
-    // without the error text
-    if (!previousStep || previousStep.type !== 'expect-error') {
-      throw new Error('.withCode should called after .expectError');
-    }
-
     const step = { value: code, type: 'expect-error-code' };
     this.steps.push(step);
 

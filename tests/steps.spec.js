@@ -122,10 +122,15 @@ test('it should allow chaining with input method', (t) => {
   t.end();
 });
 
-test('it should throw an error when withCode is not called after an expectError', (t) => {
-  t.throws(
-    () => clix('foo bar').expect('yo').withCode(2),
-    new Error('.withCode should called after .expectError')
-  );
+test('it should be possible to call withCode after an expect', (t) => {
+  const code = 2;
+
+  const scenario = clix('foo bar').expect('yo').withCode(code);
+
+  const lastStep = scenario.steps.at(-1);
+  t.deepEqual(lastStep, {
+    value: code,
+    type: 'expect-error-code',
+  });
   t.end();
 });

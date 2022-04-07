@@ -84,3 +84,20 @@ test('it should assert error message and the error message', async (t) => {
   t.true(steps.every((step) => step.ok));
   t.end();
 });
+
+test('it should assert exit code without error message', async (t) => {
+  const kExitCodeWithoutErrorMessage =
+    'bash ./tests/fixtures/exit-code-without-error-message.sh';
+  const fakeInput = 'tony';
+  const scenario = clix(kExitCodeWithoutErrorMessage)
+    .expect('Hello, who am I talking to?')
+    .input(fakeInput)
+    .expect(fakeInput)
+    .withCode(2);
+
+  const { ok, steps } = await scenario.run();
+
+  t.true(ok);
+  t.true(steps.every((step) => step.ok));
+  t.end();
+});
