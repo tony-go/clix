@@ -40,7 +40,9 @@ test('it should assert the expect value passed', async (t) => {
   const { ok, steps } = await scenario.run();
 
   t.ok(ok);
-  t.same(steps, [{ value: expectedValue, type: 'expect', ok: true }]);
+  t.same(steps.all(), [
+    { value: expectedValue, type: 'expect', ok: true, actual: expectedValue },
+  ]);
   t.end();
 });
 
@@ -54,7 +56,7 @@ test('it should write input value passed', async (t) => {
   const { ok, steps } = await scenario.run();
 
   t.ok(ok);
-  t.ok(steps.every((step) => step.ok));
+  t.ok(steps.all().every((step) => step.ok));
   t.end();
 });
 
@@ -67,7 +69,7 @@ test('it should assert error message', async (t) => {
   const { ok, steps } = await scenario.run();
 
   t.ok(ok);
-  t.ok(steps.every((step) => step.ok));
+  t.ok(steps.all().every((step) => step.ok));
   t.end();
 });
 
@@ -81,7 +83,7 @@ test('it should assert error message and the error message', async (t) => {
   const { ok, steps } = await scenario.run();
 
   t.ok(ok);
-  t.ok(steps.every((step) => step.ok));
+  t.ok(steps.all().every((step) => step.ok));
   t.end();
 });
 
@@ -98,6 +100,30 @@ test('it should assert exit code without error message', async (t) => {
   const { ok, steps } = await scenario.run();
 
   t.ok(ok);
-  t.ok(steps.every((step) => step.ok));
+  t.ok(steps.all().every((step) => step.ok));
   t.end();
 });
+
+test('.run should append actual value in each step object', async (t) => {
+  const scenario = clix(kReturnErrorWithCode)
+    .expect('Hello, who am I talking to?')
+    .input('tony')
+    .expectError('error')
+    .withCode(2);
+
+  const { steps } = await scenario.run();
+  const allSteps = steps.all();
+
+  const allStepsHaveActualProperty = allSteps
+    .filter(isNotInputStep)
+    .every(shouldHaveAnActualProperty);
+  t.ok(allStepsHaveActualProperty);
+  t.end();
+});
+
+/**
+ * HELPERS
+ */
+
+const isNotInputStep = (step) => step.type !== 'input';
+const shouldHaveAnActualProperty = (step) => step.actual !== undefined;

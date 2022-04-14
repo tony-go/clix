@@ -125,8 +125,7 @@ interface ClixResult {
   ok: boolean
   steps: {
     all: () => []Step
-    last: () => Step
-    first: () => Step
+    failed: () => Step | null
   }
 }
 
@@ -135,6 +134,7 @@ interface Step<Value> {
   type: StepEven;
   val: Value;
   ok: boolean;
+  actual?: Value;
 }
 ```
 

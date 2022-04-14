@@ -117,15 +117,26 @@ export class Scenario extends Debug {
       this.debug('step =>', res);
     }
 
-    return this.#buildResult();
+    return this.buildResult();
   }
 
-  #buildResult() {
-    return { ok: this.steps.every((step) => step.ok), steps: this.steps };
+  buildResult() {
+    return {
+      ok: this.steps.every((step) => step.ok),
+      steps: {
+        all: () => this.steps,
+        failed: () => this.#findFailedStep() || null,
+      },
+    };
+  }
+
+  #findFailedStep() {
+    return this.steps.find((step) => step.ok === false);
   }
 
   async *#checkNextLine() {
     // TODO(tony): check if proc is on activity
+    // TODO(tony): add expected value in step object for each case
     while (this.#stepPointer < this.steps.length) {
       const currentStep = this.steps[this.#stepPointer];
 
@@ -136,6 +147,7 @@ export class Scenario extends Debug {
           this.debug('equal', bufferValue, currentStep.value);
           const areValuesEqual = bufferValue === currentStep.value;
           currentStep.ok = areValuesEqual ? true : false;
+          currentStep.actual = bufferValue;
 
           this.#next();
           yield currentStep;
@@ -143,11 +155,12 @@ export class Scenario extends Debug {
         }
         // TODO(tony) move to 'exit-code'
         case 'expect-error-code': {
-          const expectedCode = this.#buffer.code;
+          const actualCode = this.#buffer.code;
 
-          this.debug('equal', expectedCode, currentStep.value);
-          const areValuesEqual = expectedCode === currentStep.value;
+          this.debug('equal', actualCode, currentStep.value);
+          const areValuesEqual = actualCode === currentStep.value;
           currentStep.ok = areValuesEqual ? true : false;
+          currentStep.actual = actualCode;
 
           this.#next();
           yield currentStep;
@@ -159,6 +172,7 @@ export class Scenario extends Debug {
           this.debug('equal', bufferValue, currentStep.value);
           const areValuesEqual = bufferValue === currentStep.value;
           currentStep.ok = areValuesEqual ? true : false;
+          currentStep.actual = bufferValue;
 
           this.#next();
           yield currentStep;
@@ -170,7 +184,6 @@ export class Scenario extends Debug {
           currentStep.ok = true;
           this.#next();
 
-          // await for next input (timer);
           await new Promise((resolve) => this.#pipe(resolve));
 
           yield currentStep;
