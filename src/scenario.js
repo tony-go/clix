@@ -146,6 +146,7 @@ export class Scenario extends Debug {
     const areValuesEqual = currentStep.value === expectedValue;
     currentStep.ok = areValuesEqual ? true : false;
     currentStep.actual = expectedValue;
+    this.debug('equal', expectedValue, currentStep.value);
   }
 
   async *#checkNextLine() {
@@ -158,7 +159,6 @@ export class Scenario extends Debug {
         case kStepType.expect: {
           const bufferValue = this.#buffer.out.shift();
 
-          this.debug('equal', bufferValue, currentStep.value);
           this._compare(currentStep, bufferValue);
           this.#next();
 
@@ -168,7 +168,6 @@ export class Scenario extends Debug {
         case kStepType.exitCode: {
           const actualCode = this.#buffer.code;
 
-          this.debug('equal', actualCode, currentStep.value);
           this._compare(currentStep, actualCode);
           this.#next();
 
@@ -178,7 +177,6 @@ export class Scenario extends Debug {
         case kStepType.expectError: {
           const bufferValue = this.#buffer.err.shift();
 
-          this.debug('equal', bufferValue, currentStep.value);
           this._compare(currentStep, bufferValue);
           this.#next();
 

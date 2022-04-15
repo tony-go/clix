@@ -1,6 +1,13 @@
-import { test } from 'tap';
+// third party dependencies
+import { test, afterEach } from 'tap';
+import { spyOn } from 'tinyspy';
 
+// internal dependencies
 import clix from '../src/index.js';
+
+afterEach(() => {
+  process.env['DEBUG'] = '';
+});
 
 test('it should expose a compare function', (t) => {
   const scenario = clix('test');
@@ -45,5 +52,22 @@ test('it should add an actual property to the current step within buffer value',
   clix('test')._compare(step, equalBufferValue);
 
   t.equal(step.actual, equalBufferValue);
+  t.end();
+});
+
+test('it should call debug method with expected and actual value', (t) => {
+  process.env['DEBUG'] = '1';
+  const debugSpy = spyOn(console, 'log');
+  const step = {
+    type: 'equal',
+    value: 'foo',
+  };
+  const equalBufferValue = 'foo';
+
+  clix('test')._compare(step, equalBufferValue);
+
+  t.equal(debugSpy.calls.length, 1);
+  const consoleArguments = debugSpy.calls.at(0).at(1);
+  t.equal(consoleArguments[('equal', equalBufferValue, step.value)]);
   t.end();
 });
