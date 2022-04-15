@@ -2,8 +2,9 @@
   "name": "@tonygo/clix",
   "version": "0.0.1",
   "description": "Write acceptance tests easily for your CLI program.",
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "type": "module",
+  "types": "clix.d.ts",
   "scripts": {
     "test:unit": "tap --no-coverage 'tests/**/*.spec.js'",
     "test:unit:watch": "tap --watch --no-coverage-report 'tests/**/*.spec.js'",
