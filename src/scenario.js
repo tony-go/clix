@@ -135,6 +135,19 @@ export class Scenario extends Debug {
     return this.steps.find((step) => step.ok === false);
   }
 
+  /**
+   * Will compare the current buffer with the current step
+   * and enrich current step with the result
+   *
+   * @param {object} currentStep - current step
+   * @param {string} expectedValue - output from console
+   */
+  _compare(currentStep, expectedValue) {
+    const areValuesEqual = currentStep.value === expectedValue;
+    currentStep.ok = areValuesEqual ? true : false;
+    currentStep.actual = expectedValue;
+  }
+
   async *#checkNextLine() {
     // TODO(tony): check if proc is on activity
     // TODO(tony): add expected value in step object for each case
@@ -146,11 +159,9 @@ export class Scenario extends Debug {
           const bufferValue = this.#buffer.out.shift();
 
           this.debug('equal', bufferValue, currentStep.value);
-          const areValuesEqual = bufferValue === currentStep.value;
-          currentStep.ok = areValuesEqual ? true : false;
-          currentStep.actual = bufferValue;
-
+          this._compare(currentStep, bufferValue);
           this.#next();
+
           yield currentStep;
           break;
         }
@@ -158,11 +169,9 @@ export class Scenario extends Debug {
           const actualCode = this.#buffer.code;
 
           this.debug('equal', actualCode, currentStep.value);
-          const areValuesEqual = actualCode === currentStep.value;
-          currentStep.ok = areValuesEqual ? true : false;
-          currentStep.actual = actualCode;
-
+          this._compare(currentStep, actualCode);
           this.#next();
+
           yield currentStep;
           break;
         }
@@ -170,11 +179,9 @@ export class Scenario extends Debug {
           const bufferValue = this.#buffer.err.shift();
 
           this.debug('equal', bufferValue, currentStep.value);
-          const areValuesEqual = bufferValue === currentStep.value;
-          currentStep.ok = areValuesEqual ? true : false;
-          currentStep.actual = bufferValue;
-
+          this._compare(currentStep, bufferValue);
           this.#next();
+
           yield currentStep;
           break;
         }
