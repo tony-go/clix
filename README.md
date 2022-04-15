@@ -42,7 +42,8 @@ assert.ok(result_1.ok);
 const scenario_2 = clix('my command')
   .expect('Hey user, what is your name?')
   .input(223)
-  .expectError('Sorry, dude!', { code: 1 });
+  .expectError('Sorry, dude!')
+  .withCode(2);
 
 const result_2 = await scenario_2.run();
 assert.ok(result_2.ok);
@@ -105,11 +106,11 @@ interface ExpectErrorOptions {
 
 Emulate an interaction with the CLI and returns the Clix instance.
 
-### **scenario.select(input: number[]): Clix**
+### **scenario.select(input: number[]): Clix** (TODO)
 
 Emulate an interaction with a list (single or multiple choice) and returns the Clix instance.
 
-### **scenario.skip(numberOfLines: number): Clix**
+### **scenario.skip(numberOfLines: number): Clix** (TODO)
 
 Skip one or more lines and returns the Clix Instance.
 
@@ -121,11 +122,19 @@ The `ClixResult` object stand for:
 
 ```ts
 interface ClixResult {
+  ok: boolean
+  steps: {
+    all: () => []Step
+    failed: () => Step | null
+  }
+}
+
+type StepEvent = 'expect' | 'expect-error' | 'exit-code' | 'input';
+interface Step<Value> {
+  type: StepEven;
+  val: Value;
   ok: boolean;
-  val: {
-    expected: string | number;
-    actual: string;
-  };
+  actual?: Value;
 }
 ```
 

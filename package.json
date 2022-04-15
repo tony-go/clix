@@ -1,0 +1,46 @@
+{
+  "name": "@tonygo/clix",
+  "version": "0.0.1",
+  "description": "Write acceptance tests easily for your CLI program.",
+  "main": "src/index.js",
+  "type": "module",
+  "types": "clix.d.ts",
+  "scripts": {
+    "test:unit": "tap --no-coverage 'tests/**/*.spec.js'",
+    "test:unit:watch": "tap --watch --no-coverage-report 'tests/**/*.spec.js'",
+    "test:functional": "tap --no-coverage 'tests/**/*.test.js'",
+    "test:all": "tap --no-coverage 'tests/**/*.js'",
+    "lint": "eslint ./src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tony-go/clix.git"
+  },
+  "keywords": [
+    "cli",
+    "tests",
+    "acceptance",
+    "tests",
+    "cli"
+  ],
+  "author": "Tony Gorez <gorez.tony@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tony-go/clix/issues"
+  },
+  "homepage": "https://github.com/tony-go/clix#readme",
+  "devDependencies": {
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "tap": "^16.0.1",
+    "tinyspy": "^0.3.0"
+  },
+  "dependencies": {
+    "cross-spawn": "^7.0.3",
+    "split2": "^4.1.0"
+  },
+  "tap": {
+    "check-coverage": false
+  }
+}
