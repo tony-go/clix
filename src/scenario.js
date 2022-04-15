@@ -104,7 +104,7 @@ export class Scenario extends Debug {
   }
 
   withCode(code) {
-    const step = { value: code, type: 'expect-error-code' };
+    const step = { value: code, type: 'exit-code' };
     this.steps.push(step);
 
     return this;
@@ -154,7 +154,7 @@ export class Scenario extends Debug {
           break;
         }
         // TODO(tony) move to 'exit-code'
-        case 'expect-error-code': {
+        case 'exit-code': {
           const actualCode = this.#buffer.code;
 
           this.debug('equal', actualCode, currentStep.value);

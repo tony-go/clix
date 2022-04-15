@@ -110,7 +110,7 @@ test('it withError function could add an expected error code', (t) => {
   const lastStep = scenario.steps.at(-1);
   t.same(lastStep, {
     value: code,
-    type: 'expect-error-code',
+    type: 'exit-code',
   });
   t.end();
 });
@@ -130,7 +130,7 @@ test('it should be possible to call withCode after an expect', (t) => {
   const lastStep = scenario.steps.at(-1);
   t.same(lastStep, {
     value: code,
-    type: 'expect-error-code',
+    type: 'exit-code',
   });
   t.end();
 });
