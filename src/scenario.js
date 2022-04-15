@@ -4,6 +4,7 @@ import splitByLine from 'split2';
 
 // internal dependencies
 import { Debug } from './debug.js';
+import { kStepType } from './constant.js';
 
 // constants
 const kGlobalTimeout = 500;
@@ -65,7 +66,7 @@ export class Scenario extends Debug {
   }
 
   #addExpectStep(value) {
-    const step = { value, type: 'expect' };
+    const step = { value, type: kStepType.expect };
     this.steps.push(step);
   }
 
@@ -82,7 +83,7 @@ export class Scenario extends Debug {
   }
 
   #addInputStep(value) {
-    const step = { value, type: 'input' };
+    const step = { value, type: kStepType.input };
     this.steps.push(step);
   }
 
@@ -99,12 +100,12 @@ export class Scenario extends Debug {
   }
 
   #addExpectErrorStep(value) {
-    const errorStep = { value, type: 'expect-error' };
+    const errorStep = { value, type: kStepType.expectError };
     this.steps.push(errorStep);
   }
 
   withCode(code) {
-    const step = { value: code, type: 'exit-code' };
+    const step = { value: code, type: kStepType.exitCode };
     this.steps.push(step);
 
     return this;
@@ -141,7 +142,7 @@ export class Scenario extends Debug {
       const currentStep = this.steps[this.#stepPointer];
 
       switch (currentStep.type) {
-        case 'expect': {
+        case kStepType.expect: {
           const bufferValue = this.#buffer.out.shift();
 
           this.debug('equal', bufferValue, currentStep.value);
@@ -153,8 +154,7 @@ export class Scenario extends Debug {
           yield currentStep;
           break;
         }
-        // TODO(tony) move to 'exit-code'
-        case 'exit-code': {
+        case kStepType.exitCode: {
           const actualCode = this.#buffer.code;
 
           this.debug('equal', actualCode, currentStep.value);
@@ -166,7 +166,7 @@ export class Scenario extends Debug {
           yield currentStep;
           break;
         }
-        case 'expect-error': {
+        case kStepType.expectError: {
           const bufferValue = this.#buffer.err.shift();
 
           this.debug('equal', bufferValue, currentStep.value);
@@ -178,7 +178,7 @@ export class Scenario extends Debug {
           yield currentStep;
           break;
         }
-        case 'input': {
+        case kStepType.input: {
           this.#writeInProc(currentStep.value);
 
           currentStep.ok = true;
