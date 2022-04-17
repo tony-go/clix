@@ -124,7 +124,7 @@ test('.run should append actual value in each step object', async (t) => {
 test('it allows to check for segmentation fault', async (t) => {
   const scenario = clix(
     'bash ./tests/fixtures/compile-and-execute.sh segfault'
-  ).expectError('Segmentation fault');
+  ).expectError(/.*Segmentation fault.*/);
 
   const { ok, steps } = await scenario.run();
 
@@ -136,7 +136,7 @@ test('it allows to check for segmentation fault', async (t) => {
 test('it allows to check for division by zero', async (t) => {
   const scenario = clix(
     'bash ./tests/fixtures/compile-and-execute.sh divby0'
-  ).expectError('Floating point exception');
+  ).expectError(/.*Floating point exception.*/);
 
   const { ok, steps } = await scenario.run();
 

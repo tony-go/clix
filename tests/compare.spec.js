@@ -42,6 +42,18 @@ test('it should set currentStep.ok to false if values are not equal', (t) => {
   t.end();
 });
 
+test('it should support regular expression', (t) => {
+  const step = {
+    type: 'equal',
+    value: /foo/,
+  };
+
+  clix('test')._compare(step, 'foo');
+
+  t.ok(step.ok);
+  t.end();
+});
+
 test('it should add an actual property to the current step within buffer value', (t) => {
   const step = {
     type: 'equal',

@@ -143,7 +143,10 @@ export class Scenario extends Debug {
    * @param {string} expectedValue - output from console
    */
   _compare(currentStep, expectedValue) {
-    const areValuesEqual = currentStep.value === expectedValue;
+    const areValuesEqual =
+      currentStep.value instanceof RegExp
+        ? currentStep.value.test(expectedValue)
+        : currentStep.value === expectedValue;
     currentStep.ok = areValuesEqual ? true : false;
     currentStep.actual = expectedValue;
     this.debug('equal', expectedValue, currentStep.value);
