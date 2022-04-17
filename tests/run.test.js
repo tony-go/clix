@@ -140,8 +140,6 @@ test('it allows to check for division by zero', async (t) => {
 
   const { ok, steps } = await scenario.run();
 
-  console.log(steps.all());
-
   t.ok(ok);
   t.ok(steps.all().every((step) => step.ok));
   t.end();
