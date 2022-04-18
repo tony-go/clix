@@ -121,6 +121,19 @@ test('.run should append actual value in each step object', async (t) => {
   t.end();
 });
 
+test('.run should throw error when a step fail but was not expected to fail', async (t) => {
+  const scenario = clix('unknown command').expect('should throw');
+
+  try {
+    await scenario.run();
+    t.ok(false);
+  } catch (e) {
+    t.ok(e.message === '/bin/sh: unknown: command not found');
+  }
+
+  t.end();
+});
+
 /**
  * HELPERS
  */

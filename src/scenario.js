@@ -158,6 +158,11 @@ export class Scenario extends Debug {
       switch (currentStep.type) {
         case kStepType.expect: {
           const bufferValue = this.#buffer.out.shift();
+          const errorValue = this.#buffer.err.shift();
+
+          if (errorValue) {
+            throw new Error(errorValue);
+          }
 
           this._compare(currentStep, bufferValue);
           this.#next();
