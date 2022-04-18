@@ -1,5 +1,7 @@
+// node dependencies
+import cp from 'child_process';
+
 // third-party dependencies
-import spawn from 'cross-spawn';
 import splitByLine from 'split2';
 
 // internal dependencies
@@ -216,7 +218,7 @@ export class Scenario extends Debug {
 
   async #spawnCommand() {
     return new Promise((resolve) => {
-      const proc = spawn(this.#command, {
+      const proc = cp.spawn(this.#command, {
         shell: true,
       });
 

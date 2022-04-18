@@ -37,7 +37,6 @@
     "tinyspy": "^0.3.0"
   },
   "dependencies": {
-    "cross-spawn": "^7.0.3",
     "split2": "^4.1.0"
   },
   "tap": {
