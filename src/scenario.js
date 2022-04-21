@@ -115,7 +115,7 @@ export class Scenario extends Debug {
     await this.#spawnCommand();
 
     for await (const res of this.#checkNextLine()) {
-      this.debug('step =>', res);
+      this.debug('proceed step =>', res);
     }
 
     return this.buildResult();
@@ -187,6 +187,7 @@ export class Scenario extends Debug {
           this.#writeInProc(currentStep.value);
 
           currentStep.ok = true;
+          this.debug('input', currentStep.value);
           this.#next();
 
           await new Promise((resolve) => this.#pipe(resolve));
@@ -231,6 +232,7 @@ export class Scenario extends Debug {
 
   #pipe(resolve) {
     let timer = setTimeout(resolve, this.#globalTimeout);
+    this.debug('in pipe');
 
     this.#proc.stdout.pipe(splitByLine()).on('data', (line) => {
       clearTimeout(timer);
