@@ -2,7 +2,7 @@ type StepEvent = 'expect' | 'expect-error' | 'exit-code' | 'input';
 
 interface Step<Value = string> {
   type: StepEvent;
-  val: Value;
+  value: Value;
   ok: boolean;
   actual?: Value;
 }
