@@ -4,7 +4,7 @@
   "description": "",
   "type": "module",
   "bin": {
-    "name": ".bin"
+    "prog": ".bin"
   },
   "scripts": {
     "test": "node test.js"
