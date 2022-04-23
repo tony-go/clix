@@ -1,9 +1,12 @@
 import assert from 'assert';
+import path from 'path';
 
 import clix from '../../src/index.js';
 
 async function test() {
-  const scenario = clix('node ./bin.js')
+  const cwd = process.cwd();
+  const fullPath = path.join(cwd, 'examples', 'js', 'bin.js');
+  const scenario = clix('node' + ' ' + fullPath)
     .expect('What is your name?')
     .input('Joe')
     .expect('Hello, Joe!');
