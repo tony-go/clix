@@ -174,7 +174,7 @@ export class Scenario extends Debug {
 
       process.on('exit', async (code) => {
         this.debug('exited with code: ', code);
-        this.#handleData(code, { ...context, isError: code == 2 });
+        this.#handleData(code, { ...context, isError: code != 0 });
       });
     });
   }

@@ -27,7 +27,7 @@ test('it should spawn a process when run is called', async (t) => {
     'Hello, who am I talking to?'
   );
 
-  scenario.run();
+  await scenario.run();
 
   t.ok(spawnSpy.called);
   t.end();
