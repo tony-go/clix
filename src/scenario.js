@@ -1,10 +1,7 @@
-// third-party dependencies
-import spawn from 'cross-spawn';
-import splitByLine from 'split2';
-
 // internal dependencies
 import { Debug } from './debug.js';
 import { kStepType } from './constant.js';
+import { Process } from './process.js';
 
 // constants
 const kGlobalTimeout = 500;
@@ -17,10 +14,10 @@ export class Scenario extends Debug {
   #command;
 
   /**
-   * @type {ChildProcess}
+   * @type {Process}
    * @description current child process running the command
    */
-  #proc;
+  #process;
 
   /**
    * @type {number}
@@ -29,23 +26,16 @@ export class Scenario extends Debug {
   #globalTimeout = kGlobalTimeout;
 
   /**
-   * @typedef OutputBuffer
-   * @type {object}
-   * @property {Array.<string>} out - all stdout lines
-   * @property {Array.<string>} err - all stderr lines
-   * @description contains outputs from child process
-   */
-  #buffer = {
-    out: [],
-    err: [],
-    code: null,
-  };
-
-  /**
    * @type {number}
    * @description index of the current step
    */
   #stepPointer = 0;
+
+  /**
+   * @type {Timeout}
+   * @description global timer to handle timeout
+   */
+  #timer = null;
 
   constructor(command) {
     super(command);
@@ -70,20 +60,13 @@ export class Scenario extends Debug {
     this.steps.push(step);
   }
 
-  input(value) {
-    if (typeof value === 'string') {
-      this.#addInputStep(value);
-    } else if (Array.isArray(value)) {
-      for (const input of value) {
-        this.#addInputStep(input);
-      }
-    }
-
+  input(value, input) {
+    this.#addInputStep(value, input);
     return this;
   }
 
-  #addInputStep(value) {
-    const step = { value, type: kStepType.input };
+  #addInputStep(value, input) {
+    const step = { value, input, type: kStepType.input };
     this.steps.push(step);
   }
 
@@ -113,11 +96,6 @@ export class Scenario extends Debug {
 
   async run() {
     await this.#spawnCommand();
-
-    for await (const res of this.#checkNextLine()) {
-      this.debug('step =>', res);
-    }
-
     return this.buildResult();
   }
 
@@ -149,106 +127,81 @@ export class Scenario extends Debug {
     this.debug('equal', expectedValue, currentStep.value);
   }
 
-  async *#checkNextLine() {
-    // TODO(tony): check if proc is on activity
-    // TODO(tony): add expected value in step object for each case
-    while (this.#stepPointer < this.steps.length) {
-      const currentStep = this.steps[this.#stepPointer];
-
-      switch (currentStep.type) {
-        case kStepType.expect: {
-          const bufferValue = this.#buffer.out.shift();
-          const errorValue = this.#buffer.err.shift();
-
-          if (errorValue) {
-            throw new Error(errorValue);
-          }
-
-          this._compare(currentStep, bufferValue);
-          this.#next();
-
-          yield currentStep;
-          break;
-        }
-        case kStepType.exitCode: {
-          const actualCode = this.#buffer.code;
-
-          this._compare(currentStep, actualCode);
-          this.#next();
-
-          yield currentStep;
-          break;
-        }
-        case kStepType.expectError: {
-          const bufferValue = this.#buffer.err.shift();
-
-          this._compare(currentStep, bufferValue);
-          this.#next();
-
-          yield currentStep;
-          break;
-        }
-        case kStepType.input: {
-          this.#writeInProc(currentStep.value);
-
-          currentStep.ok = true;
-          this.#next();
-
-          await new Promise((resolve) => this.#pipe(resolve));
-
-          yield currentStep;
-          break;
-        }
-        default: {
-          throw new Error(`step ${currentStep.type} doesn't exist`);
-        }
-      }
-    }
-  }
-
-  #writeInProc(value) {
-    this.#proc.stdin.setEncoding('utf-8');
-    this.#proc.stdin.write(value);
-    this.#proc.stdin.end();
-  }
-
   #next() {
     this.#stepPointer++;
   }
 
+  #nextStep() {
+    return this.steps[this.#stepPointer++];
+  }
+
+  #resetTimer() {
+    clearTimeout(this.#timer);
+  }
+
+  #startTimer(done) {
+    this.#timer = setTimeout(done, kGlobalTimeout);
+  }
+
   async #spawnCommand() {
-    return new Promise((resolve) => {
-      const proc = spawn(this.#command, {
-        shell: true,
+    return new Promise((resolve, reject) => {
+      const context = {
+        done: resolve,
+        reject,
+        write: (input) => this.#process.write(input),
+      };
+
+      const process = new Process();
+
+      this.#startTimer(resolve);
+
+      process.spawn(this.#command);
+
+      process.on('spawn', (pid) => {
+        this.debug('spawn, pid:', pid);
+        this.#process = process;
       });
 
-      proc.on('spawn', () => {
-        this.debug('spawn, pid:', proc.pid);
-        this.#proc = proc;
-        this.#pipe(resolve);
+      process.on('data', (line) => {
+        this.debug('data received: ', line);
+        this.#handleData(line, { ...context, isError: false });
       });
 
-      proc.on('exit', (code) => {
-        this.#buffer.code = code;
+      process.on('error', async (line) => {
+        this.debug('error received: ', line);
+        this.#handleData(line, { ...context, isError: true });
+      });
+
+      process.on('exit', async (code) => {
+        this.debug('exited with code: ', code);
+        this.#handleData(code, { ...context, isError: code == 2 });
       });
     });
   }
 
-  #pipe(resolve) {
-    let timer = setTimeout(resolve, this.#globalTimeout);
+  #handleData(data, { write, done, reject, isError }) {
+    this.#resetTimer();
 
-    this.#proc.stdout.pipe(splitByLine()).on('data', (line) => {
-      clearTimeout(timer);
-      this.debug('piped stdout line ->', line);
-      this.#buffer.out.push(line);
-      timer = setTimeout(resolve, this.#globalTimeout);
-    });
+    const currentStep = this.#nextStep();
 
-    this.#proc.stderr.pipe(splitByLine()).on('data', (line) => {
-      clearTimeout(timer);
-      this.debug('piped stderr line ->', line);
-      this.#buffer.err.push(line);
-      timer = setTimeout(resolve, this.#globalTimeout);
-    });
+    if (!currentStep) {
+      this.#process.kill();
+      isError ? reject(new Error(data)) : done();
+      return;
+    }
+
+    if (isError && currentStep.type == kStepType.expect) {
+      this.#process.kill();
+      reject(new Error(data));
+      return;
+    }
+
+    this._compare(currentStep, data);
+
+    if (currentStep.type == kStepType.input) {
+      write(currentStep.input);
+    }
+
+    this.#startTimer(done);
   }
 }
