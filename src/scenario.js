@@ -20,7 +20,7 @@ export class Scenario extends Debug {
    * @type {ChildProcess}
    * @description current child process running the command
    */
-  #proc;
+  _proc;
 
   /**
    * @type {number}
@@ -115,7 +115,7 @@ export class Scenario extends Debug {
     await this.#spawnCommand();
 
     for await (const res of this.#checkNextLine()) {
-      this.debug('step =>', res);
+      this.debug('proceed step =>', res);
     }
 
     return this.buildResult();
@@ -184,9 +184,10 @@ export class Scenario extends Debug {
           break;
         }
         case kStepType.input: {
-          this.#writeInProc(currentStep.value);
+          this._writeInProc(currentStep.value);
 
           currentStep.ok = true;
+          this.debug('input', currentStep.value);
           this.#next();
 
           await new Promise((resolve) => this.#pipe(resolve));
@@ -201,10 +202,23 @@ export class Scenario extends Debug {
     }
   }
 
-  #writeInProc(value) {
-    this.#proc.stdin.setEncoding('utf-8');
-    this.#proc.stdin.write(value);
-    this.#proc.stdin.end();
+  /**
+   * Write user input in the process
+   * @param {*} rawInput - input to write in the process
+   */
+  _writeInProc(rawInput) {
+    const input = this._formatInput(rawInput);
+    this._proc.stdin.setEncoding('utf-8');
+    this._proc.stdin.write(input);
+    this._proc.stdin.end();
+  }
+
+  /**
+   * Format the input to be written in the process
+   * @param {string} input - input to write in the process
+   */
+  _formatInput(input) {
+    return input.includes('\n') ? input : input + '\n';
   }
 
   #next() {
@@ -219,7 +233,7 @@ export class Scenario extends Debug {
 
       proc.on('spawn', () => {
         this.debug('spawn, pid:', proc.pid);
-        this.#proc = proc;
+        this._proc = proc;
         this.#pipe(resolve);
       });
 
@@ -231,15 +245,16 @@ export class Scenario extends Debug {
 
   #pipe(resolve) {
     let timer = setTimeout(resolve, this.#globalTimeout);
+    this.debug('in pipe');
 
-    this.#proc.stdout.pipe(splitByLine()).on('data', (line) => {
+    this._proc.stdout.pipe(splitByLine()).on('data', (line) => {
       clearTimeout(timer);
       this.debug('piped stdout line ->', line);
       this.#buffer.out.push(line);
       timer = setTimeout(resolve, this.#globalTimeout);
     });
 
-    this.#proc.stderr.pipe(splitByLine()).on('data', (line) => {
+    this._proc.stderr.pipe(splitByLine()).on('data', (line) => {
       clearTimeout(timer);
       this.debug('piped stderr line ->', line);
       this.#buffer.err.push(line);
