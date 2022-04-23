@@ -5,22 +5,23 @@ interface Step<Value = string> {
   val: Value;
   ok: boolean;
   actual?: Value;
+  input?: string;
 }
 
 interface ClixResult {
-  ok: boolean
+  ok: boolean;
   steps: {
-    all: () => Array<Step>
-    failed: () => Step | null
-  }
+    all: () => Array<Step>;
+    failed: () => Step | null;
+  };
 }
 
 export interface Clix {
-  expect: (value: string | Array<string>) => Clix
-  expectError: (value: string | Array<string>) => Clix
-  exitCode: (code: number) => Clix
-  input: (value: string | Array<string>) => Clix
-  run: () => Promise<ClixResult>
+  expect: (value: string | Array<string>) => Clix;
+  expectError: (value: string | Array<string>) => Clix;
+  exitCode: (code: number) => Clix;
+  input: (value: string | Array<string>) => Clix;
+  run: () => Promise<ClixResult>;
 }
 
 declare function clix(command: string): Clix;
