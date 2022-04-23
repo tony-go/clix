@@ -9,6 +9,7 @@
     "test:unit": "tap --no-coverage 'tests/**/*.spec.js'",
     "test:unit:watch": "tap --watch --no-coverage-report 'tests/**/*.spec.js'",
     "test:functional": "tap --no-coverage 'tests/**/*.test.js'",
+    "test:examples": "node scripts/examples.js",
     "test:all": "tap --no-coverage 'tests/**/*.js'",
     "lint": "eslint ./src"
   },

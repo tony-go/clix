@@ -29,4 +29,8 @@ jobs:
       name: Run functional tests
       env:
         CI: true
+    - run: npm run test:examples
+      name: Run example tests
+      env:
+        CI: true
       
