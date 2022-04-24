@@ -1,7 +1,7 @@
 import { test } from 'tap';
 
-import clix, { Scenario } from '../src/index.js';
-import { kStepType } from '../src/constant.js';
+import clix, { Scenario } from '../../src/index.js';
+import { kStepType } from '../../src/constant.js';
 
 test('it should expose an expect function to add an expected value', (t) => {
   const scenario = clix('foo bar');

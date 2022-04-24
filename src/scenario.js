@@ -17,7 +17,7 @@ export class Scenario extends Debug {
    * @type {Process}
    * @description current child process running the command
    */
-  #process;
+  _proc;
 
   /**
    * @type {number}
@@ -43,6 +43,18 @@ export class Scenario extends Debug {
     this.steps = [];
   }
 
+  /**
+   * ////////////////////////
+   * // PUBLIC API METHODS //
+   * ////////////////////////
+   */
+
+  /**
+   * Allow user to declare an expected output
+   * @param {string} value
+   * @param {Array<string>} value
+   * @returns {Scenario}
+   */
   expect(value) {
     if (typeof value === 'string') {
       this.#addExpectStep(value);
@@ -55,21 +67,24 @@ export class Scenario extends Debug {
     return this;
   }
 
-  #addExpectStep(value) {
-    const step = { value, type: kStepType.expect };
-    this.steps.push(step);
-  }
-
+  /**
+   * Allows to simulate a user input
+   * @param {String} value
+   * @param {Array<String>} value
+   * @returns {Scenario}
+   */
   input(value, input) {
     this.#addInputStep(value, input);
+
     return this;
   }
 
-  #addInputStep(value, input) {
-    const step = { value, input, type: kStepType.input };
-    this.steps.push(step);
-  }
-
+  /**
+   * Allow user to declare an expected error
+   * @param {String} error
+   * @param {Array<String>} error
+   * @returns {Scenario}
+   */
   expectError(error) {
     if (Array.isArray(error)) {
       for (const err of error) {
@@ -82,11 +97,11 @@ export class Scenario extends Debug {
     return this;
   }
 
-  #addExpectErrorStep(value) {
-    const errorStep = { value, type: kStepType.expectError };
-    this.steps.push(errorStep);
-  }
-
+  /**
+   * Allow user to declare an expected exit code
+   * @param {Number} code
+   * @returns {Scenario}
+   */
   withCode(code) {
     const step = { value: code, type: kStepType.exitCode };
     this.steps.push(step);
@@ -94,12 +109,33 @@ export class Scenario extends Debug {
     return this;
   }
 
+  /**
+   * Allows user to execute the scenario
+   * @returns {Promise<ClixResult>}
+   */
   async run() {
     await this.#spawnCommand();
     return this.buildResult();
   }
 
-  buildResult() {
+  /**
+   *
+   * RESTRICTED METHODS
+   * (generally available for testing purpose)
+   *
+   */
+
+  /**
+   * @typedef ClixResult
+   * @type {object}
+   * @property {boolean} ok - true if all steps are ok
+   * @property {object} steps
+   * @property {Function} steps.all - will return all steps
+   * @property {Function} steps.failed - will return the last failed steps
+   *
+   * @returns {ClixResult}
+   */
+  _buildResult() {
     return {
       ok: this.steps.every((step) => step.ok),
       steps: {
@@ -107,10 +143,6 @@ export class Scenario extends Debug {
         failed: () => this.#findFailedStep() || null,
       },
     };
-  }
-
-  #findFailedStep() {
-    return this.steps.find((step) => step.ok === false);
   }
 
   /**
@@ -127,8 +159,64 @@ export class Scenario extends Debug {
     this.debug('equal', expectedValue, currentStep.value);
   }
 
-  #next() {
-    this.#stepPointer++;
+  /**
+   * Write user input in the process
+   * @param {*} rawInput - input to write in the process
+   */
+  _writeInProc(rawInput) {
+    const input = this._formatInput(rawInput);
+    this._proc.stdin.setEncoding('utf-8');
+    this._proc.stdin.write(input);
+    this._proc.stdin.end();
+  }
+
+  /**
+   * Format the input to be written in the process
+   * @param {string} input - input to write in the process
+   */
+  _formatInput(input) {
+    return input.includes('\n') ? input : input + '\n';
+  }
+
+  /**
+   *
+   * PRIVATE METHODS
+   *
+   */
+
+  /**
+   * Add 'expect' step to the scenario
+   * @param {string} value - value to add in the scenario
+   */
+  #addExpectStep(value) {
+    const step = { value, type: kStepType.expect };
+    this.steps.push(step);
+  }
+
+  /**
+   * Add 'input' step to the scenario
+   * @param {string} value - input to add in the scenario
+   */
+  #addInputStep(value, input) {
+    const step = { value, input, type: kStepType.input };
+    this.steps.push(step);
+  }
+
+  /**
+   * Add 'expect-error' step to the scenario
+   * @param {string} value - value to add in the scenario
+   */
+  #addExpectErrorStep(value) {
+    const errorStep = { value, type: kStepType.expectError };
+    this.steps.push(errorStep);
+  }
+
+  /**
+   * Find the first failed step from this.steps
+   * @returns {Step} first failed step
+   */
+  #findFailedStep() {
+    return this.steps.find((step) => step.ok === false);
   }
 
   #nextStep() {
@@ -148,7 +236,7 @@ export class Scenario extends Debug {
       const context = {
         done: resolve,
         reject,
-        write: (input) => this.#process.write(input),
+        write: (input) => this._proc.write(input),
       };
 
       const process = new Process();
@@ -159,7 +247,7 @@ export class Scenario extends Debug {
 
       process.on('spawn', (pid) => {
         this.debug('spawn, pid:', pid);
-        this.#process = process;
+        this._proc = process;
       });
 
       process.on('data', (line) => {
@@ -185,13 +273,13 @@ export class Scenario extends Debug {
     const currentStep = this.#nextStep();
 
     if (!currentStep) {
-      this.#process.kill();
+      this._proc.kill();
       isError ? reject(new Error(data)) : done();
       return;
     }
 
     if (isError && currentStep.type == kStepType.expect) {
-      this.#process.kill();
+      this._proc.kill();
       reject(new Error(data));
       return;
     }
