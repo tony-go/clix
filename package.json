@@ -7,10 +7,10 @@
   "types": "clix.d.ts",
   "scripts": {
     "test:unit": "cross-env tap --no-coverage 'tests/**/*.spec.js'",
-    "test:unit:watch": "tap --watch --no-coverage-report 'tests/**/*.spec.js'",
+    "test:unit:watch": "cross-env tap --watch --no-coverage-report 'tests/**/*.spec.js'",
     "test:functional": "cross-env tap --no-coverage 'tests/**/*.test.js'",
     "test:examples": "node scripts/examples.js",
-    "test:all": "tap --no-coverage 'tests/**/*.js'",
+    "test:all": "cross-env tap --no-coverage 'tests/**/*.js'",
     "lint": "eslint ./src"
   },
   "repository": {
