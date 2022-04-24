@@ -125,7 +125,7 @@ test('.run should throw error when a step fail but was not expected to fail', as
     await scenario.run();
     t.ok(false);
   } catch (e) {
-    t.ok(e.message === '/bin/sh: unknown: command not found');
+    t.ok(e.message);
   }
 
   t.end();
