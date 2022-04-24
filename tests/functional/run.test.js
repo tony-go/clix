@@ -6,13 +6,15 @@ import { test } from 'tap';
 import { spyOn } from 'tinyspy';
 
 // internal dependencies
-import clix from '../src/index.js';
+import clix from '../../src/index.js';
 
 // constants
-const kSimpleOutputCommand = 'bash ./tests/fixtures/simple.sh';
-const kSimpleCommandWithOutput = 'bash ./tests/fixtures/simple-with-input.sh';
-const kReturnError = 'bash ./tests/fixtures/return-error.sh';
-const kReturnErrorWithCode = 'bash ./tests/fixtures/return-error-with-code.sh';
+const kSimpleOutputCommand = 'bash ./tests/functional/fixtures/simple.sh';
+const kSimpleCommandWithOutput =
+  'bash ./tests/functional/fixtures/simple-with-input.sh';
+const kReturnError = 'bash ./tests/functional/fixtures/return-error.sh';
+const kReturnErrorWithCode =
+  'bash ./tests/functional/fixtures/return-error-with-code.sh';
 
 test('it should expose a run method', (t) => {
   const scenario = clix(kSimpleOutputCommand);
@@ -89,7 +91,7 @@ test('it should assert error message and the error message', async (t) => {
 
 test('it should assert exit code without error message', async (t) => {
   const kExitCodeWithoutErrorMessage =
-    'bash ./tests/fixtures/exit-code-without-error-message.sh';
+    'bash ./tests/functional/fixtures/exit-code-without-error-message.sh';
   const fakeInput = 'tony';
   const scenario = clix(kExitCodeWithoutErrorMessage)
     .expect('Hello, who am I talking to?')

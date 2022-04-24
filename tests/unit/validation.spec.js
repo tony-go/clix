@@ -1,6 +1,6 @@
 import { test } from 'tap';
 
-import clix, { Scenario } from '../src/index.js';
+import clix, { Scenario } from '../../src/index.js';
 
 test('it should expose a function', (t) => {
   t.ok(clix instanceof Function);

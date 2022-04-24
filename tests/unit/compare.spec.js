@@ -3,7 +3,7 @@ import { test, afterEach } from 'tap';
 import { spyOn } from 'tinyspy';
 
 // internal dependencies
-import clix from '../src/index.js';
+import clix from '../../src/index.js';
 
 afterEach(() => {
   process.env['DEBUG'] = '';

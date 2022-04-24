@@ -6,9 +6,9 @@
   "type": "module",
   "types": "clix.d.ts",
   "scripts": {
-    "test:unit": "cross-env tap --no-coverage 'tests/**/*.spec.js'",
-    "test:unit:watch": "cross-env tap --watch --no-coverage-report 'tests/**/*.spec.js'",
-    "test:functional": "cross-env tap --no-coverage 'tests/**/*.test.js'",
+    "test:unit": "cross-env tap --no-coverage 'tests/unit/**/*.spec.js'",
+    "test:unit:watch": "cross-env tap --watch --no-coverage-report 'tests/unit/**/*.spec.js'",
+    "test:functional": "cross-env tap --no-coverage 'tests/functional/**/*.test.js'",
     "test:examples": "node scripts/examples.js",
     "test:all": "cross-env tap --no-coverage 'tests/**/*.js'",
     "lint": "eslint ./src"

@@ -1,6 +1,6 @@
 import { test } from 'tap';
 
-import clix from '../src/index.js';
+import clix from '../../src/index.js';
 
 test('it should expose a _buildResult method as public', (t) => {
   const scenario = clix('my-command');
