@@ -138,4 +138,8 @@ interface Step<Value> {
 }
 ```
 
+## 💪🏼 Contributing
+
+Are interested in contributing? 😍 Please read the [contribution guide](./CONTRIBUTING.md) first.
+
 
