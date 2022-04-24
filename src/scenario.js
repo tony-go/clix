@@ -73,8 +73,14 @@ export class Scenario extends Debug {
    * @param {Array<String>} value
    * @returns {Scenario}
    */
-  input(value, input) {
-    this.#addInputStep(value, input);
+  input(value) {
+    if (typeof value === 'string') {
+      this.#addInputStep(value);
+    } else if (Array.isArray(value)) {
+      for (const input of value) {
+        this.#addInputStep(input);
+      }
+    }
 
     return this;
   }
@@ -164,10 +170,8 @@ export class Scenario extends Debug {
    * @param {*} rawInput - input to write in the process
    */
   _writeInProc(rawInput) {
-    const input = this._formatInput(rawInput);
-    this._proc.stdin.setEncoding('utf-8');
-    this._proc.stdin.write(input);
-    this._proc.stdin.end();
+    this.debug(this.#command, `write input: ${rawInput}`);
+    this._proc.write(this._formatInput(rawInput));
   }
 
   /**
@@ -197,8 +201,8 @@ export class Scenario extends Debug {
    * Add 'input' step to the scenario
    * @param {string} value - input to add in the scenario
    */
-  #addInputStep(value, input) {
-    const step = { value, input, type: kStepType.input };
+  #addInputStep(input) {
+    const step = { value: input, type: kStepType.input };
     this.steps.push(step);
   }
 
@@ -236,7 +240,6 @@ export class Scenario extends Debug {
       const context = {
         done: resolve,
         reject,
-        write: (input) => this._proc.write(input),
       };
 
       const process = new Process();
@@ -248,6 +251,8 @@ export class Scenario extends Debug {
       process.on('spawn', (pid) => {
         this.debug('spawn, pid:', pid);
         this._proc = process;
+
+        this.#fillNextInputSteps();
       });
 
       process.on('data', (line) => {
@@ -267,7 +272,24 @@ export class Scenario extends Debug {
     });
   }
 
-  #handleData(data, { write, done, reject, isError }) {
+  #fillNextInputSteps() {
+    let currentStep = this.steps[this.#stepPointer];
+    if (!currentStep) {
+      return;
+    }
+
+    if (currentStep.type !== kStepType.input) {
+      return;
+    }
+
+    currentStep.ok = true;
+    this._writeInProc(currentStep.value);
+    this.#stepPointer++;
+
+    this.#fillNextInputSteps(this.#stepPointer + 1);
+  }
+
+  #handleData(data, { done, reject, isError }) {
     this.#resetTimer();
 
     const currentStep = this.#nextStep();
@@ -285,11 +307,7 @@ export class Scenario extends Debug {
     }
 
     this._compare(currentStep, data);
-
-    if (currentStep.type == kStepType.input) {
-      write(currentStep.input);
-    }
-
+    this.#fillNextInputSteps();
     this.#startTimer(done);
   }
 }

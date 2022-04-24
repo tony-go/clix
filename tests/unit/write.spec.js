@@ -35,13 +35,7 @@ test('_writeInProc should not add if it is already in the input', (t) => {
  */
 
 function mockWriteFromProc(scenario, writeFn) {
-  scenario._proc = {
-    stdin: {
-      write: writeFn,
-      setEncoding: () => {},
-      end: () => {},
-    },
-  };
+  scenario._proc = { write: writeFn };
 }
 
 function getArgumentFromSpy(spyFn) {

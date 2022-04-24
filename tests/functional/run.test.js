@@ -51,7 +51,8 @@ test('it should assert the expect value passed', async (t) => {
 test('it should write input value passed', async (t) => {
   const name = 'tony';
   const scenario = clix(kSimpleCommandWithOutput)
-    .input('Hello, who am I talking to?', name)
+    .expect('Hello, who am I talking to?')
+    .input(name)
     .expect(`Hey ${name}!`);
 
   const { ok, steps } = await scenario.run();
@@ -63,7 +64,8 @@ test('it should write input value passed', async (t) => {
 
 test('it should assert error message', async (t) => {
   const scenario = clix(kReturnError)
-    .input('Hello, who am I talking to?', 'tony')
+    .expect('Hello, who am I talking to?')
+    .input('tony')
     .expectError('error');
 
   const { ok, steps } = await scenario.run();
@@ -75,7 +77,8 @@ test('it should assert error message', async (t) => {
 
 test('it should assert error message and the error message', async (t) => {
   const scenario = clix(kReturnErrorWithCode)
-    .input('Hello, who am I talking to?', 'tony')
+    .expect('Hello, who am I talking to?')
+    .input('tony')
     .expectError('error')
     .withCode(2);
 
@@ -91,7 +94,8 @@ test('it should assert exit code without error message', async (t) => {
     'bash ./tests/functional/fixtures/exit-code-without-error-message.sh';
   const fakeInput = 'tony';
   const scenario = clix(kExitCodeWithoutErrorMessage)
-    .input('Hello, who am I talking to?', fakeInput)
+    .expect('Hello, who am I talking to?')
+    .input(fakeInput)
     .expect(fakeInput)
     .withCode(2);
 
@@ -104,7 +108,8 @@ test('it should assert exit code without error message', async (t) => {
 
 test('.run should append actual value in each step object', async (t) => {
   const scenario = clix(kReturnErrorWithCode)
-    .input('Hello, who am I talking to?', 'tony')
+    .expect('Hello, who am I talking to?')
+    .input('tony')
     .expectError('error')
     .withCode(2);
 

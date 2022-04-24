@@ -5,7 +5,6 @@ interface Step<Value = string> {
   value: Value;
   ok: boolean;
   actual?: Value;
-  input?: string;
 }
 
 interface ClixResult {
