@@ -1,7 +1,7 @@
 import { test } from 'tap';
 import { spy } from 'tinyspy';
 
-import clix from '../src/index.js';
+import clix from '../../src/index.js';
 
 test('_writeInProc add a \n if the input does not contain it', (t) => {
   const scenario = clix('random command');
