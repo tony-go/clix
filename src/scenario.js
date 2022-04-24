@@ -115,7 +115,7 @@ export class Scenario extends Debug {
    */
   async run() {
     await this.#spawnCommand();
-    return this.buildResult();
+    return this._buildResult();
   }
 
   /**
