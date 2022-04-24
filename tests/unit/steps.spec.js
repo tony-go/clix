@@ -38,16 +38,14 @@ test('it should expose an input function to add an expected value', (t) => {
   const scenario = clix('foo bar');
   const inputValue = 'hey';
 
-  scenario.input('hey ?', inputValue);
+  scenario.input(inputValue);
 
-  t.same(scenario.steps, [
-    { value: 'hey ?', input: inputValue, type: kStepType.input },
-  ]);
+  t.same(scenario.steps, [{ value: inputValue, type: kStepType.input }]);
   t.end();
 });
 
 test('it should allow chaining with input method', (t) => {
-  const scenario = clix('foo bar').input('hi ?', 'yo').input('bar ?', 'foo');
+  const scenario = clix('foo bar').input('yo').input('foo');
 
   t.ok(scenario instanceof Scenario);
   t.end();
