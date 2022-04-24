@@ -205,21 +205,37 @@ export class Scenario extends Debug {
    *
    */
 
+  /**
+   * Add 'expect' step to the scenario
+   * @param {string} value - value to add in the scenario
+   */
   #addExpectStep(value) {
     const step = { value, type: kStepType.expect };
     this.steps.push(step);
   }
 
+  /**
+   * Add 'input' step to the scenario
+   * @param {string} value - input to add in the scenario
+   */
   #addInputStep(value) {
     const step = { value, type: kStepType.input };
     this.steps.push(step);
   }
 
+  /**
+   * Add 'expect-error' step to the scenario
+   * @param {string} value - value to add in the scenario
+   */
   #addExpectErrorStep(value) {
     const errorStep = { value, type: kStepType.expectError };
     this.steps.push(errorStep);
   }
 
+  /**
+   * Find the first failed step from this.steps
+   * @returns {Step} first failed step
+   */
   #findFailedStep() {
     return this.steps.find((step) => step.ok === false);
   }
@@ -277,10 +293,17 @@ export class Scenario extends Debug {
     }
   }
 
+  /**
+   * Increase the step pointer
+   */
   #next() {
     this.#stepPointer++;
   }
 
+  /**
+   * Spawn the command
+   * @returns {Promise<void>} - resolve when the command is spawned and first outputs are received
+   */
   async #spawnCommand() {
     return new Promise((resolve) => {
       const proc = spawn(this.#command, {
@@ -299,6 +322,10 @@ export class Scenario extends Debug {
     });
   }
 
+  /**
+   * Pipe the process output (stdout, stderr) to this.#buffer object (internal)
+   * @returns {Promise<void>} - resolve when first outputs are received
+   */
   #pipe(resolve) {
     let timer = setTimeout(resolve, this.#globalTimeout);
     this.debug('in pipe');
