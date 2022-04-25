@@ -236,7 +236,7 @@ export class Scenario extends Debug {
   }
 
   #startTimer(done) {
-    this.#timer = setTimeout(done, kGlobalTimeout);
+    this.#timer = setTimeout(done, this.#globalTimeout);
   }
 
   async #spawnCommand() {
