@@ -37,6 +37,10 @@ export class Process {
       this.#publish('exit', code);
     });
 
+    proc.on('error', (line) => {
+      this.#publish('error', line);
+    });
+
     proc.stdout.pipe(splitByLine()).on('data', (line) => {
       this.#publish('data', line);
     });
