@@ -223,8 +223,12 @@ export class Scenario extends Debug {
     return this.steps.find((step) => step.ok === false);
   }
 
-  #nextStep() {
-    return this.steps[this.#stepPointer++];
+  #next() {
+    this.#stepPointer++;
+  }
+
+  get #currentStep() {
+    return this.steps.at(this.#stepPointer);
   }
 
   #resetTimer() {
@@ -271,7 +275,7 @@ export class Scenario extends Debug {
   }
 
   #fillNextInputSteps() {
-    const currentStep = this.#nextStep();
+    const currentStep = this.#currentStep;
     if (!currentStep) {
       return;
     }
@@ -283,17 +287,14 @@ export class Scenario extends Debug {
     this._writeInProc(currentStep.value);
     currentStep.ok = true;
 
-    const nextStep = this.steps.at(this.#stepPointer);
-    const isNextStepInput = nextStep && nextStep.type === kStepType.input;
-    if (isNextStepInput) {
-      this.#fillNextInputSteps();
-    }
+    this.#next();
+    this.#fillNextInputSteps();
   }
 
   #handleData(data, { done, reject, isError }) {
     this.#resetTimer();
 
-    const currentStep = this.#nextStep();
+    const currentStep = this.#currentStep;
 
     if (!currentStep) {
       this._proc.kill();
@@ -308,13 +309,8 @@ export class Scenario extends Debug {
     }
 
     this._compare(currentStep, data);
-
-    const nextStep = this.steps.at(this.#stepPointer);
-    const isNextStepInput = nextStep && nextStep.type === kStepType.input;
-    if (isNextStepInput) {
-      this.#fillNextInputSteps();
-    }
-
+    this.#next();
+    this.#fillNextInputSteps();
     this.#startTimer(done);
   }
 }
