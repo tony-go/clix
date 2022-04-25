@@ -5,52 +5,33 @@ export class Player {
   #proc = null;
   #subscriptions = {};
 
-  on(eventName, callback) {
-    if (!this.#subscriptions[eventName]) {
-      this.#subscriptions[eventName] = [];
-    }
+  dataHandler = null;
 
-    this.#subscriptions[eventName].push(callback);
-  }
-
-  kill() {
+  stop() {
     this.#proc.kill('SIGINT');
   }
 
-  #subscribe(eventName, eventData) {
-    const subscribers = this.#subscriptions[eventName];
-
-    if (!subscribers) {
-      return;
-    }
-
-    for (const callback of subscribers) {
-      callback(eventData);
-    }
-  }
-
-  spawn(command) {
+  start(command) {
     const proc = spawn(command, { shell: true });
 
     proc.on('spawn', () => {
       this.#proc = proc;
-      this.#subscribe('spawn', proc.pid);
     });
 
     proc.on('exit', (code) => {
-      this.#subscribe('exit', code);
+      this.dataHandler(code, code !== 0);
     });
 
     proc.on('error', (line) => {
-      this.#subscribe('error', line);
+      this.dataHandler(line, true);
     });
 
     proc.stdout.pipe(splitByLine()).on('data', (line) => {
-      this.#subscribe('data', line);
+      this.dataHandler(line, false);
     });
 
     proc.stderr.pipe(splitByLine()).on('data', (line) => {
-      this.#subscribe('error', line);
+      this.dataHandler(line, true);
     });
   }
 

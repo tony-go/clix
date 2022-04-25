@@ -120,7 +120,7 @@ export class Scenario extends Debug {
    * @returns {Promise<ClixResult>}
    */
   async run() {
-    await this.#spawnCommand();
+    await this.#play();
     return this._buildResult();
   }
 
@@ -227,7 +227,7 @@ export class Scenario extends Debug {
     this.#stepPointer++;
   }
 
-  get #currentStep() {
+  #currentStep() {
     return this.steps.at(this.#stepPointer);
   }
 
@@ -239,40 +239,24 @@ export class Scenario extends Debug {
     this.#timer = setTimeout(done, this.#globalTimeout);
   }
 
-  async #spawnCommand() {
+  async #play() {
     return new Promise((resolve, reject) => {
       const context = {
         done: resolve,
         reject,
       };
 
+      this.#player.dataHandler = (line, isError) =>
+        this.#handleData(line, { ...context, isError });
+
       this.#startTimer(resolve);
 
-      this.#player.spawn(this.#command);
-
-      this.#player.on('spawn', (pid) => {
-        this.debug('spawn, pid:', pid);
-      });
-
-      this.#player.on('data', (line) => {
-        this.debug('data received: ', line);
-        this.#handleData(line, { ...context, isError: false });
-      });
-
-      this.#player.on('error', async (line) => {
-        this.debug('error received: ', line);
-        this.#handleData(line, { ...context, isError: true });
-      });
-
-      this.#player.on('exit', async (code) => {
-        this.debug('exited with code: ', code);
-        this.#handleData(code, { ...context, isError: code != 0 });
-      });
+      this.#player.start(this.#command);
     });
   }
 
   #fillNextInputSteps() {
-    const currentStep = this.#currentStep;
+    const currentStep = this.#currentStep();
     if (!currentStep || currentStep.type !== kStepType.input) {
       return;
     }
@@ -285,17 +269,18 @@ export class Scenario extends Debug {
   }
 
   #handleData(data, { done, reject, isError }) {
+    this.debug(this.#command, `${isError ? 'error' : 'data'}: ${data}`);
     this.#resetTimer();
 
-    const currentStep = this.#currentStep;
+    const currentStep = this.#currentStep();
     if (!currentStep) {
-      this.#player.kill();
+      this.#player.stop();
       isError ? reject(new Error(data)) : done();
       return;
     }
 
     if (isError && currentStep.type === kStepType.expect) {
-      this.#player.kill();
+      this.#player.stop();
       reject(new Error(data));
       return;
     }

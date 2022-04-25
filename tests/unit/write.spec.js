@@ -1,17 +1,8 @@
 import { test } from 'tap';
 import { Scenario } from '../../src/index.js';
-import { Player } from '../../src/player.js';
 
-class PlayerStub extends Player {
+class PlayerStub {
   lastInput = null;
-
-  kill() {
-    // do nothing
-  }
-
-  spawn() {
-    // do nothing
-  }
 
   write(input) {
     this.lastInput = input;
