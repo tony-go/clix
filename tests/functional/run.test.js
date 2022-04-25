@@ -39,10 +39,10 @@ test('it should assert the expect value passed', async (t) => {
   const expectedValue = 'Hello, who am I talking to?';
   const scenario = clix(kSimpleOutputCommand).expect(expectedValue);
 
-  const { ok, steps } = await scenario.run();
+  const { ok, acts } = await scenario.run();
 
   t.ok(ok);
-  t.same(steps.all(), [
+  t.same(acts.all(), [
     { value: expectedValue, type: 'expect', ok: true, actual: expectedValue },
   ]);
   t.end();
@@ -55,10 +55,10 @@ test('it should write input value passed', async (t) => {
     .input(name)
     .expect(`Hey ${name}!`);
 
-  const { ok, steps } = await scenario.run();
+  const { ok, acts } = await scenario.run();
 
   t.ok(ok);
-  t.ok(steps.all().every((step) => step.ok));
+  t.ok(acts.all().every((act) => act.ok));
   t.end();
 });
 
@@ -68,10 +68,10 @@ test('it should assert error message', async (t) => {
     .input('tony')
     .expectError('error');
 
-  const { ok, steps } = await scenario.run();
+  const { ok, acts } = await scenario.run();
 
   t.ok(ok);
-  t.ok(steps.all().every((step) => step.ok));
+  t.ok(acts.all().every((act) => act.ok));
   t.end();
 });
 
@@ -82,10 +82,10 @@ test('it should assert error message and the error message', async (t) => {
     .expectError('error')
     .withCode(2);
 
-  const { ok, steps } = await scenario.run();
+  const { ok, acts } = await scenario.run();
 
   t.ok(ok);
-  t.ok(steps.all().every((step) => step.ok));
+  t.ok(acts.all().every((act) => act.ok));
   t.end();
 });
 
@@ -99,31 +99,31 @@ test('it should assert exit code without error message', async (t) => {
     .expect(fakeInput)
     .withCode(2);
 
-  const { ok, steps } = await scenario.run();
+  const { ok, acts } = await scenario.run();
 
   t.ok(ok);
-  t.ok(steps.all().every((step) => step.ok));
+  t.ok(acts.all().every((act) => act.ok));
   t.end();
 });
 
-test('.run should append actual value in each step object', async (t) => {
+test('.run should append actual value in each act object', async (t) => {
   const scenario = clix(kReturnErrorWithCode)
     .expect('Hello, who am I talking to?')
     .input('tony')
     .expectError('error')
     .withCode(2);
 
-  const { steps } = await scenario.run();
-  const allSteps = steps.all();
+  const { acts } = await scenario.run();
+  const allActs = acts.all();
 
-  const allStepsHaveActualProperty = allSteps
-    .filter(isNotInputStep)
+  const allActsHaveActualProperty = allActs
+    .filter(isNotInputAct)
     .every(shouldHaveAnActualProperty);
-  t.ok(allStepsHaveActualProperty);
+  t.ok(allActsHaveActualProperty);
   t.end();
 });
 
-test('.run should throw error when a step fail but was not expected to fail', async (t) => {
+test('.run should throw error when a act fail but was not expected to fail', async (t) => {
   const scenario = clix('unknown command').expect('should throw');
 
   try {
@@ -140,5 +140,5 @@ test('.run should throw error when a step fail but was not expected to fail', as
  * HELPERS
  */
 
-const isNotInputStep = (step) => step.type !== 'input';
-const shouldHaveAnActualProperty = (step) => step.actual !== undefined;
+const isNotInputAct = (act) => act.type !== 'input';
+const shouldHaveAnActualProperty = (act) => act.actual !== undefined;

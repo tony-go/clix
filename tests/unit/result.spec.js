@@ -18,16 +18,16 @@ test('_buildResult should return an .ok property', (t) => {
   t.end();
 });
 
-test('_buildResult should return a .steps property within an .all property', (t) => {
+test('_buildResult should return a .acts property within an .all property', (t) => {
   const scenario = clix('my-command');
 
-  const { steps } = scenario._buildResult();
+  const { acts } = scenario._buildResult();
 
-  t.equal(typeof steps.all, 'function');
+  t.equal(typeof acts.all, 'function');
   t.end();
 });
 
-test('steps.all should return all steps', (t) => {
+test('acts.all should return all acts', (t) => {
   // given
   const scenario = clix('my-command')
     .expect('foo')
@@ -35,32 +35,32 @@ test('steps.all should return all steps', (t) => {
     .expectError('baz');
 
   // when
-  const { steps } = scenario._buildResult();
-  const allSteps = steps.all();
+  const { acts } = scenario._buildResult();
+  const allActs = acts.all();
 
   // then
-  t.equal(allSteps.length, scenario.steps.length);
+  t.equal(allActs.length, scenario.acts.length);
   t.end();
 });
 
-test('steps.last should return the last step that failed', (t) => {
+test('acts.last should return the last act that failed', (t) => {
   // given
   const scenario = clix('my-command')
     .expect('foo')
     .input('bar')
     .expectError('baz');
-  scenario.steps[0].ok = false; // simulate .run() call
+  scenario.acts[0].ok = false; // simulate .run() call
 
   // when
-  const { steps } = scenario._buildResult();
-  const lastFailedSteps = steps.failed();
+  const { acts } = scenario._buildResult();
+  const lastFailedActs = acts.failed();
 
   // then
-  t.equal(lastFailedSteps.value, 'foo');
+  t.equal(lastFailedActs.value, 'foo');
   t.end();
 });
 
-test('steps.last should return the last step if nothing failed', (t) => {
+test('acts.last should return the last act if nothing failed', (t) => {
   // given
   const scenario = clix('my-command')
     .expect('foo')
@@ -69,9 +69,9 @@ test('steps.last should return the last step if nothing failed', (t) => {
   const res = scenario._buildResult();
 
   // when
-  const step = res.steps.failed();
+  const act = res.acts.failed();
 
   // then
-  t.equal(step, null);
+  t.equal(act, null);
   t.end();
 });

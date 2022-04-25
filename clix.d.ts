@@ -1,7 +1,7 @@
-type StepEvent = 'expect' | 'expect-error' | 'exit-code' | 'input';
+type ActType = 'expect' | 'expect-error' | 'exit-code' | 'input';
 
-interface Step<Value = string> {
-  type: StepEvent;
+interface Act<Value = string> {
+  type: ActType;
   value: Value;
   ok: boolean;
   actual?: Value;
@@ -9,9 +9,9 @@ interface Step<Value = string> {
 
 interface ClixResult {
   ok: boolean;
-  steps: {
-    all: () => Array<Step>;
-    failed: () => Step | null;
+  acts: {
+    all: () => Array<Act>;
+    failed: () => Act | null;
   };
 }
 
