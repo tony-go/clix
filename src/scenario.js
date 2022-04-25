@@ -276,11 +276,7 @@ export class Scenario extends Debug {
 
   #fillNextInputSteps() {
     const currentStep = this.#currentStep;
-    if (!currentStep) {
-      return;
-    }
-
-    if (currentStep.type !== kStepType.input) {
+    if (!currentStep || currentStep.type !== kStepType.input) {
       return;
     }
 
