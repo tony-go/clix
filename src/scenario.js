@@ -125,10 +125,10 @@ export class Scenario extends Debug {
   }
 
   /**
-   *
-   * RESTRICTED METHODS
+   * ////////////////////////
+   * // RESTRICTED METHODS //
+   * ////////////////////////
    * (generally available for testing purpose)
-   *
    */
 
   /**
@@ -183,9 +183,9 @@ export class Scenario extends Debug {
   }
 
   /**
-   *
-   * PRIVATE METHODS
-   *
+   * /////////////////////
+   * // PRIVATE METHODS //
+   * /////////////////////
    */
 
   /**
@@ -245,7 +245,6 @@ export class Scenario extends Debug {
         done: resolve,
         reject,
       };
-
       const process = new Process();
 
       this.#startTimer(resolve);
@@ -291,7 +290,6 @@ export class Scenario extends Debug {
     this.#resetTimer();
 
     const currentStep = this.#currentStep;
-
     if (!currentStep) {
       this._proc.kill();
       isError ? reject(new Error(data)) : done();
