@@ -17,7 +17,7 @@ export class Process {
     this.#proc.kill('SIGINT');
   }
 
-  #publish(eventName, eventData) {
+  #subscribe(eventName, eventData) {
     const subscribers = this.#subscriptions[eventName];
 
     for (const callback of subscribers) {
@@ -30,23 +30,23 @@ export class Process {
 
     proc.on('spawn', () => {
       this.#proc = proc;
-      this.#publish('spawn', proc.pid);
+      this.#subscribe('spawn', proc.pid);
     });
 
     proc.on('exit', (code) => {
-      this.#publish('exit', code);
+      this.#subscribe('exit', code);
     });
 
     proc.on('error', (line) => {
-      this.#publish('error', line);
+      this.#subscribe('error', line);
     });
 
     proc.stdout.pipe(splitByLine()).on('data', (line) => {
-      this.#publish('data', line);
+      this.#subscribe('data', line);
     });
 
     proc.stderr.pipe(splitByLine()).on('data', (line) => {
-      this.#publish('error', line);
+      this.#subscribe('error', line);
     });
   }
 
