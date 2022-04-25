@@ -1,7 +1,7 @@
 import spawn from 'cross-spawn';
 import splitByLine from 'split2';
 
-export class Process {
+export class Player {
   #proc = null;
   #subscriptions = {};
 
@@ -19,6 +19,10 @@ export class Process {
 
   #subscribe(eventName, eventData) {
     const subscribers = this.#subscriptions[eventName];
+
+    if (!subscribers) {
+      return;
+    }
 
     for (const callback of subscribers) {
       callback(eventData);

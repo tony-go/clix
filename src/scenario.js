@@ -1,7 +1,6 @@
 // internal dependencies
 import { Debug } from './debug.js';
 import { kStepType } from './constant.js';
-import { Process } from './process.js';
 
 // constants
 const kGlobalTimeout = 500;
@@ -14,10 +13,10 @@ export class Scenario extends Debug {
   #command;
 
   /**
-   * @type {Process}
-   * @description current child process running the command
+   * @type {Player}
+   * @description current player running the command
    */
-  _proc;
+  #player;
 
   /**
    * @type {number}
@@ -37,10 +36,11 @@ export class Scenario extends Debug {
    */
   #timer = null;
 
-  constructor(command) {
+  constructor(command, player) {
     super(command);
     this.#command = command;
     this.steps = [];
+    this.#player = player;
   }
 
   /**
@@ -171,7 +171,7 @@ export class Scenario extends Debug {
    */
   _writeInProc(rawInput) {
     this.debug(this.#command, `write input: ${rawInput}`);
-    this._proc.write(this._formatInput(rawInput));
+    this.#player.write(this._formatInput(rawInput));
   }
 
   /**
@@ -245,28 +245,26 @@ export class Scenario extends Debug {
         done: resolve,
         reject,
       };
-      const process = new Process();
 
       this.#startTimer(resolve);
 
-      process.spawn(this.#command);
+      this.#player.spawn(this.#command);
 
-      process.on('spawn', (pid) => {
+      this.#player.on('spawn', (pid) => {
         this.debug('spawn, pid:', pid);
-        this._proc = process;
       });
 
-      process.on('data', (line) => {
+      this.#player.on('data', (line) => {
         this.debug('data received: ', line);
         this.#handleData(line, { ...context, isError: false });
       });
 
-      process.on('error', async (line) => {
+      this.#player.on('error', async (line) => {
         this.debug('error received: ', line);
         this.#handleData(line, { ...context, isError: true });
       });
 
-      process.on('exit', async (code) => {
+      this.#player.on('exit', async (code) => {
         this.debug('exited with code: ', code);
         this.#handleData(code, { ...context, isError: code != 0 });
       });
@@ -291,13 +289,13 @@ export class Scenario extends Debug {
 
     const currentStep = this.#currentStep;
     if (!currentStep) {
-      this._proc.kill();
+      this.#player.kill();
       isError ? reject(new Error(data)) : done();
       return;
     }
 
-    if (isError && currentStep.type == kStepType.expect) {
-      this._proc.kill();
+    if (isError && currentStep.type === kStepType.expect) {
+      this.#player.kill();
       reject(new Error(data));
       return;
     }
