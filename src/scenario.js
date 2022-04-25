@@ -251,8 +251,6 @@ export class Scenario extends Debug {
       process.on('spawn', (pid) => {
         this.debug('spawn, pid:', pid);
         this._proc = process;
-
-        this.#fillNextInputSteps();
       });
 
       process.on('data', (line) => {
@@ -273,7 +271,7 @@ export class Scenario extends Debug {
   }
 
   #fillNextInputSteps() {
-    let currentStep = this.steps[this.#stepPointer];
+    const currentStep = this.#nextStep();
     if (!currentStep) {
       return;
     }
@@ -282,11 +280,14 @@ export class Scenario extends Debug {
       return;
     }
 
-    currentStep.ok = true;
     this._writeInProc(currentStep.value);
-    this.#stepPointer++;
+    currentStep.ok = true;
 
-    this.#fillNextInputSteps(this.#stepPointer + 1);
+    const nextStep = this.steps.at(this.#stepPointer);
+    const isNextStepInput = nextStep && nextStep.type === kStepType.input;
+    if (isNextStepInput) {
+      this.#fillNextInputSteps();
+    }
   }
 
   #handleData(data, { done, reject, isError }) {
@@ -307,7 +308,13 @@ export class Scenario extends Debug {
     }
 
     this._compare(currentStep, data);
-    this.#fillNextInputSteps();
+
+    const nextStep = this.steps.at(this.#stepPointer);
+    const isNextStepInput = nextStep && nextStep.type === kStepType.input;
+    if (isNextStepInput) {
+      this.#fillNextInputSteps();
+    }
+
     this.#startTimer(done);
   }
 }
