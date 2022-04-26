@@ -1,4 +1,4 @@
-export const kStepType = {
+export const kActType = {
   input: 'input',
   expect: 'expect',
   expectError: 'expect-error',

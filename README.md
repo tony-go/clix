@@ -9,7 +9,7 @@
 ## ⭐️ Features
 
 - 🏎 CLI Runner out of the box
-- 🌈 Simple API 
+- 🌈 Simple API
 - 🔄 Async/Await based
 - 🌝 Test runner agnostic
 
@@ -123,15 +123,15 @@ The `ClixResult` object stand for:
 ```ts
 interface ClixResult {
   ok: boolean
-  steps: {
-    all: () => []Step
-    failed: () => Step | null
+  acts: {
+    all: () => []Act
+    failed: () => Act | null
   }
 }
 
-type StepEvent = 'expect' | 'expect-error' | 'exit-code' | 'input';
-interface Step<Value> {
-  type: StepEven;
+type ActType = 'expect' | 'expect-error' | 'exit-code' | 'input';
+interface Act<Value> {
+  type: ActType;
   val: Value;
   ok: boolean;
   actual?: Value;
