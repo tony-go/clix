@@ -243,12 +243,11 @@ export class Scenario extends Debug {
   async #play() {
     return new Promise((resolve, reject) => {
       const context = {
-        done: resolve,
+        resolve,
         reject,
+        handler: this.#handleData.bind(this),
       };
-
-      this.#player.dataHandler = (line, isError) =>
-        this.#handleData(line, { ...context, isError });
+      this.#player.setContext(context);
 
       this.#startTimer(resolve);
 
@@ -269,14 +268,14 @@ export class Scenario extends Debug {
     this.#fillNextInputActs();
   }
 
-  #handleData(data, { done, reject, isError }) {
+  #handleData(data, { resolve, reject, isError }) {
     this.debug(this.#command, `${isError ? 'error' : 'data'}: ${data}`);
     this.#resetTimer();
 
     const currentAct = this.#currentAct();
     if (!currentAct) {
       this.#player.stop();
-      isError ? reject(new Error(data)) : done();
+      isError ? reject(new Error(data)) : resolve();
       return;
     }
 
@@ -289,6 +288,6 @@ export class Scenario extends Debug {
     this._compare(currentAct, data);
     this.#next();
     this.#fillNextInputActs();
-    this.#startTimer(done);
+    this.#startTimer(resolve);
   }
 }
