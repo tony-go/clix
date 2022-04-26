@@ -1,7 +1,7 @@
 import { test } from 'tap';
 
-import clix, { Scenario } from '../src/index.js';
-import { kStepType } from '../src/constant.js';
+import clix, { Scenario } from '../../src/index.js';
+import { kActType } from '../../src/constant.js';
 
 test('it should expose an expect function to add an expected value', (t) => {
   const scenario = clix('foo bar');
@@ -9,7 +9,7 @@ test('it should expose an expect function to add an expected value', (t) => {
 
   scenario.expect(expectedValue);
 
-  t.same(scenario.steps, [{ value: expectedValue, type: kStepType.expect }]);
+  t.same(scenario.acts, [{ value: expectedValue, type: kActType.expect }]);
   t.end();
 });
 
@@ -20,9 +20,9 @@ test('it should expose an expect function to add an several expected Values', (t
 
   scenario.expect([valueA, valueB]);
 
-  t.same(scenario.steps, [
-    { value: valueA, type: kStepType.expect },
-    { value: valueB, type: kStepType.expect },
+  t.same(scenario.acts, [
+    { value: valueA, type: kActType.expect },
+    { value: valueB, type: kActType.expect },
   ]);
   t.end();
 });
@@ -40,7 +40,7 @@ test('it should expose an input function to add an expected value', (t) => {
 
   scenario.input(inputValue);
 
-  t.same(scenario.steps, [{ value: inputValue, type: kStepType.input }]);
+  t.same(scenario.acts, [{ value: inputValue, type: kActType.input }]);
   t.end();
 });
 
@@ -51,9 +51,9 @@ test('it should expose an expect function to add an several expected Values', (t
 
   scenario.input([inputA, inputB]);
 
-  t.same(scenario.steps, [
-    { value: inputA, type: kStepType.input },
-    { value: inputB, type: kStepType.input },
+  t.same(scenario.acts, [
+    { value: inputA, type: kActType.input },
+    { value: inputB, type: kActType.input },
   ]);
   t.end();
 });
@@ -71,10 +71,10 @@ test('it expectError function could add expected errors', (t) => {
   const error = 'error';
   scenario.expectError(error);
 
-  t.same(scenario.steps, [
+  t.same(scenario.acts, [
     {
       value: error,
-      type: kStepType.expectError,
+      type: kActType.expectError,
     },
   ]);
   t.end();
@@ -87,9 +87,9 @@ test('it expectError could take an array of string', (t) => {
 
   scenario.expectError([errorA, errorB]);
 
-  t.same(scenario.steps, [
-    { value: errorA, type: kStepType.expectError },
-    { value: errorB, type: kStepType.expectError },
+  t.same(scenario.acts, [
+    { value: errorA, type: kActType.expectError },
+    { value: errorB, type: kActType.expectError },
   ]);
   t.end();
 });
@@ -108,10 +108,10 @@ test('it withError function could add an expected error code', (t) => {
   const errorText = 'yo';
   scenario.expectError(errorText).withCode(code);
 
-  const lastStep = scenario.steps.at(-1);
-  t.same(lastStep, {
+  const lastAct = scenario.acts.at(-1);
+  t.same(lastAct, {
     value: code,
-    type: kStepType.exitCode,
+    type: kActType.exitCode,
   });
   t.end();
 });
@@ -128,10 +128,10 @@ test('it should be possible to call withCode after an expect', (t) => {
 
   const scenario = clix('foo bar').expect('yo').withCode(code);
 
-  const lastStep = scenario.steps.at(-1);
-  t.same(lastStep, {
+  const lastAct = scenario.acts.at(-1);
+  t.same(lastAct, {
     value: code,
-    type: kStepType.exitCode,
+    type: kActType.exitCode,
   });
   t.end();
 });
