@@ -1,4 +1,3 @@
-import { Player } from './player.js';
 import { Scenario } from './scenario.js';
 
 export function clix(command) {
@@ -10,5 +9,5 @@ export function clix(command) {
     throw new Error('Command should not be an empty string');
   }
 
-  return new Scenario(command, new Player());
+  return new Scenario(command);
 }

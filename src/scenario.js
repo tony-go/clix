@@ -1,6 +1,7 @@
 // internal dependencies
 import { Debug } from './debug.js';
 import { kActType } from './constant.js';
+import { Player } from './player.js';
 
 // constants
 const kGlobalTimeout = 500;
@@ -36,7 +37,7 @@ export class Scenario extends Debug {
    */
   #timer = null;
 
-  constructor(command, player) {
+  constructor(command, player = new Player()) {
     super(command);
     this.#command = command;
     this.acts = [];
