@@ -3,7 +3,6 @@ import splitByLine from 'split2';
 
 export class Player {
   #proc = null;
-  #subscriptions = {};
 
   dataHandler = null;
 
