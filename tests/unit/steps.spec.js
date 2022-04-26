@@ -3,37 +3,6 @@ import { test } from 'tap';
 import clix, { Scenario } from '../../src/index.js';
 import { kActType } from '../../src/constant.js';
 
-test('it should expose an expect function to add an expected value', (t) => {
-  const scenario = clix('foo bar');
-  const expectedValue = 'hey';
-
-  scenario.expect(expectedValue);
-
-  t.same(scenario.acts, [{ value: expectedValue, type: kActType.expect }]);
-  t.end();
-});
-
-test('it should expose an expect function to add an several expected Values', (t) => {
-  const scenario = clix('foo bar');
-  const valueA = 'hey';
-  const valueB = 'yo';
-
-  scenario.expect([valueA, valueB]);
-
-  t.same(scenario.acts, [
-    { value: valueA, type: kActType.expect },
-    { value: valueB, type: kActType.expect },
-  ]);
-  t.end();
-});
-
-test('it should allow chaining with expect method', (t) => {
-  const scenario = clix('foo bar').expect('yo').expect('foo');
-
-  t.ok(scenario instanceof Scenario);
-  t.end();
-});
-
 test('it should expose an input function to add an expected value', (t) => {
   const scenario = clix('foo bar');
   const inputValue = 'hey';
@@ -44,7 +13,7 @@ test('it should expose an input function to add an expected value', (t) => {
   t.end();
 });
 
-test('it should expose an expect function to add an several expected Values', (t) => {
+test('it should expose an input function to add an several expected Values', (t) => {
   const scenario = clix('foo bar');
   const inputA = 'hey';
   const inputB = 'yo';
@@ -75,6 +44,7 @@ test('it expectError function could add expected errors', (t) => {
     {
       value: error,
       type: kActType.expectError,
+      options: {},
     },
   ]);
   t.end();
@@ -88,8 +58,8 @@ test('it expectError could take an array of string', (t) => {
   scenario.expectError([errorA, errorB]);
 
   t.same(scenario.acts, [
-    { value: errorA, type: kActType.expectError },
-    { value: errorB, type: kActType.expectError },
+    { value: errorA, type: kActType.expectError, options: {} },
+    { value: errorB, type: kActType.expectError, options: {} },
   ]);
   t.end();
 });

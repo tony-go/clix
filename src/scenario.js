@@ -2,6 +2,7 @@
 import { Debug } from './debug.js';
 import { kActType } from './constant.js';
 import { Player } from './player.js';
+import { TimeoutError } from './errors.js';
 
 // constants
 const kGlobalTimeout = 500;
@@ -37,6 +38,12 @@ export class Scenario extends Debug {
    */
   #timer = null;
 
+  /**
+   * @type {Timeout}
+   * @description act timer to handle timeout for a particular act
+   */
+  #actTimer = null;
+
   constructor(command, player = new Player()) {
     super(command);
     this.#command = command;
@@ -56,9 +63,9 @@ export class Scenario extends Debug {
    * @param {Array<string>} value
    * @returns {Scenario}
    */
-  expect(value) {
+  expect(value, options = {}) {
     if (typeof value === 'string') {
-      this.#addExpectAct(value);
+      this.#addExpectAct(value, options);
     } else if (Array.isArray(value)) {
       for (const act of value) {
         this.#addExpectAct(act);
@@ -92,13 +99,13 @@ export class Scenario extends Debug {
    * @param {Array<String>} error
    * @returns {Scenario}
    */
-  expectError(error) {
+  expectError(error, options = {}) {
     if (Array.isArray(error)) {
       for (const err of error) {
         this.#addExpectErrorAct(err);
       }
     } else {
-      this.#addExpectErrorAct(error);
+      this.#addExpectErrorAct(error, options);
     }
 
     return this;
@@ -193,8 +200,8 @@ export class Scenario extends Debug {
    * Add 'expect' act to the scenario
    * @param {string} value - value to add in the scenario
    */
-  #addExpectAct(value) {
-    const act = { value, type: kActType.expect };
+  #addExpectAct(value, options = {}) {
+    const act = { value, type: kActType.expect, options };
     this.acts.push(act);
   }
 
@@ -211,8 +218,8 @@ export class Scenario extends Debug {
    * Add 'expect-error' act to the scenario
    * @param {string} value - value to add in the scenario
    */
-  #addExpectErrorAct(value) {
-    const errorAct = { value, type: kActType.expectError };
+  #addExpectErrorAct(value, options = {}) {
+    const errorAct = { value, type: kActType.expectError, options };
     this.acts.push(errorAct);
   }
 
@@ -232,12 +239,24 @@ export class Scenario extends Debug {
     return this.acts.at(this.#actPointer);
   }
 
-  #resetTimer() {
+  #resetGlobalTimer() {
     clearTimeout(this.#timer);
   }
 
-  #startTimer(done) {
+  #resetActTimer() {
+    clearTimeout(this.#actTimer);
+  }
+
+  #startGlobalTimer(done) {
     this.#timer = setTimeout(done, this.#globalTimeout);
+  }
+
+  #startActTimer(reject, timeout) {
+    this.#actTimer = setTimeout(() => {
+      reject(
+        new TimeoutError('The act did not take place within the allotted time')
+      );
+    }, timeout);
   }
 
   async #play() {
@@ -249,7 +268,8 @@ export class Scenario extends Debug {
       };
       this.#player.setContext(context);
 
-      this.#startTimer(resolve);
+      this.#startGlobalTimer(resolve);
+      this.#prepareActTimeout(reject);
 
       this.#player.start(this.#command);
     });
@@ -268,9 +288,24 @@ export class Scenario extends Debug {
     this.#fillNextInputActs();
   }
 
+  #prepareActTimeout(reject) {
+    const currentAct = this.#currentAct();
+    if (!currentAct || !currentAct.options) {
+      return;
+    }
+
+    const { timeout } = currentAct.options;
+
+    if (timeout) {
+      this.debug(this.#command, `act timeout set to ${timeout}`);
+      this.#startActTimer(reject, timeout);
+    }
+  }
+
   #handleData(data, { resolve, reject, isError }) {
     this.debug(this.#command, `${isError ? 'error' : 'data'}: ${data}`);
-    this.#resetTimer();
+    this.#resetActTimer();
+    this.#resetGlobalTimer();
 
     const currentAct = this.#currentAct();
     if (!currentAct) {
@@ -288,6 +323,7 @@ export class Scenario extends Debug {
     this._compare(currentAct, data);
     this.#next();
     this.#fillNextInputActs();
-    this.#startTimer(resolve);
+    this.#prepareActTimeout(reject);
+    this.#startGlobalTimer(resolve);
   }
 }
