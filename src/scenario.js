@@ -327,6 +327,9 @@ export class Scenario extends Debug {
     }
 
     this._compare(act, code);
-    resolve();
+
+    if (this.acts.every((act) => act.ok !== undefined)) {
+      resolve();
+    }
   }
 }
