@@ -5,7 +5,7 @@ import { Player } from './player.js';
 import { TimeoutError } from './errors.js';
 
 // constants
-const kGlobalTimeout = 500;
+const kDefaultTimeout = 500;
 
 export class Scenario extends Debug {
   /**
@@ -24,7 +24,7 @@ export class Scenario extends Debug {
    * @type {number}
    * @description default timeout
    */
-  #globalTimeout = kGlobalTimeout;
+  #defaultTimeout = kDefaultTimeout;
 
   /**
    * @type {number}
@@ -37,12 +37,6 @@ export class Scenario extends Debug {
    * @description global timer to handle timeout
    */
   #timer = null;
-
-  /**
-   * @type {Timeout}
-   * @description act timer to handle timeout for a particular act
-   */
-  #actTimer = null;
 
   constructor(command, player = new Player()) {
     super(command);
@@ -239,24 +233,8 @@ export class Scenario extends Debug {
     return this.acts.at(this.#actPointer);
   }
 
-  #resetGlobalTimer() {
+  #resetTimer() {
     clearTimeout(this.#timer);
-  }
-
-  #resetActTimer() {
-    clearTimeout(this.#actTimer);
-  }
-
-  #startGlobalTimer(done) {
-    this.#timer = setTimeout(done, this.#globalTimeout);
-  }
-
-  #startActTimer(reject, timeout) {
-    this.#actTimer = setTimeout(() => {
-      reject(
-        new TimeoutError('The act did not take place within the allotted time')
-      );
-    }, timeout);
   }
 
   async #play() {
@@ -265,11 +243,11 @@ export class Scenario extends Debug {
         resolve,
         reject,
         handler: this.#handleData.bind(this),
+        exitHandler: this.#handleExit.bind(this),
       };
       this.#player.setContext(context);
 
-      this.#startGlobalTimer(resolve);
-      this.#prepareActTimeout(reject);
+      this.#startTimer(resolve, reject);
 
       this.#player.start(this.#command);
     });
@@ -288,27 +266,34 @@ export class Scenario extends Debug {
     this.#fillNextInputActs();
   }
 
-  #prepareActTimeout(reject) {
+  #startTimer(resolve, reject) {
     const currentAct = this.#currentAct();
-    if (!currentAct || !currentAct.options) {
+    if (!currentAct) {
+      resolve();
       return;
     }
 
-    const { timeout } = currentAct.options;
+    const timeout = currentAct.options?.timeout;
 
     if (timeout) {
       this.debug(this.#command, `act timeout set to ${timeout}`);
-      this.#startActTimer(reject, timeout);
+      this.#timer = setTimeout(() => {
+        reject(
+          new TimeoutError(
+            'The act did not take place within the allotted time'
+          )
+        );
+      }, timeout);
+    } else {
+      this.#timer = setTimeout(resolve, this.#defaultTimeout);
     }
   }
 
   #handleData(data, { resolve, reject, isError }) {
-    this.debug(this.#command, `${isError ? 'error' : 'data'}: ${data}`);
-    this.#resetActTimer();
-    this.#resetGlobalTimer();
+    this.#resetTimer();
 
     const currentAct = this.#currentAct();
-    if (!currentAct) {
+    if (!currentAct || currentAct.ok !== undefined) {
       this.#player.stop();
       isError ? reject(new Error(data)) : resolve();
       return;
@@ -322,8 +307,26 @@ export class Scenario extends Debug {
 
     this._compare(currentAct, data);
     this.#next();
+
     this.#fillNextInputActs();
-    this.#prepareActTimeout(reject);
-    this.#startGlobalTimer(resolve);
+    this.#startTimer(resolve, reject);
+  }
+
+  #handleExit(code, { resolve, reject, isError }) {
+    this.#resetTimer();
+    this.debug(this.#command, `exit with code ${code}`);
+
+    const act = this.acts.at(-1);
+
+    if (act.type !== kActType.exitCode) {
+      if (isError) {
+        reject(new Error(`Process terminated with exit code ${code}`));
+      }
+
+      return;
+    }
+
+    this._compare(act, code);
+    resolve();
   }
 }

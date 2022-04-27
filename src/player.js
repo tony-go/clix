@@ -40,14 +40,14 @@ export class Player {
   start(command) {
     // TODO(tony): check this.#context is not null
     const proc = spawn(command, { shell: true });
-    const { handler, ...context } = this.#context;
+    const { handler, exitHandler, ...context } = this.#context;
 
     proc.on('spawn', () => {
       this.#proc = proc;
     });
 
     proc.on('exit', (code) => {
-      handler(code, { ...context, isError: code != 0 });
+      exitHandler(code, { ...context, isError: code !== 0 });
     });
 
     proc.on('error', (line) => {
