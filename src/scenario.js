@@ -62,6 +62,7 @@ export class Scenario extends Debug {
       this.#addExpectAct(value, options);
     } else if (Array.isArray(value)) {
       for (const act of value) {
+        // todo(tony): add support for options
         this.#addExpectAct(act);
       }
     }
@@ -96,6 +97,7 @@ export class Scenario extends Debug {
   expectError(error, options = {}) {
     if (Array.isArray(error)) {
       for (const err of error) {
+        // todo(tony): add support for options
         this.#addExpectErrorAct(err);
       }
     } else {
