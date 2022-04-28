@@ -148,7 +148,7 @@ test('.run should succeed if timeout are not elapsed', async (t) => {
   const scenario = clix(kCustomTimeoutCommand)
     .expect('Hello, who am I talking to?')
     .input(name)
-    .expect('Hey ' + name + '!', { timeout: 3_000 });
+    .expect(`Hey ${name}!`, { timeout: 3_000 });
 
   const res = await scenario.run();
 
@@ -162,7 +162,7 @@ test('.run should failed of timeout are elapsed', async (t) => {
   const scenario = clix(kCustomTimeoutCommand)
     .expect('Hello, who am I talking to?')
     .input(name)
-    .expect('Hey ' + name + '!', { timeout: 1_000 });
+    .expect(`Hey ${name}!`, { timeout: 1_000 });
 
   await t.rejects(scenario.run());
   t.end();
