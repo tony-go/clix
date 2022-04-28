@@ -1,5 +1,6 @@
 import spawn from 'cross-spawn';
 import splitByLine from 'split2';
+import { createRequire } from 'module';
 
 export class Player {
   /**
@@ -14,6 +15,9 @@ export class Player {
    * @type {object.handler} function to handle data
    */
   #context = null;
+
+  #pauseProcess = null;
+  #continueProcess = null;
 
   /**
    * @param {void}
@@ -38,6 +42,12 @@ export class Player {
    * @description Start the player (spawn the process)
    */
   start(command) {
+    if (process.platform === 'win32') {
+      const { suspend, resume } = createRequire(import.meta.url)('ntsuspend');
+      this.#pauseProcess = suspend;
+      this.#continueProcess = resume;
+    }
+
     // TODO(tony): check this.#context is not null
     const proc = spawn(command, { shell: true });
     const { handler, exitHandler, ...context } = this.#context;
@@ -47,28 +57,27 @@ export class Player {
     });
 
     proc.on('exit', (code) => {
-      this.#proc.kill('SIGSTOP');
       exitHandler(code, { ...context, isError: code !== 0 });
     });
 
     proc.on('error', (line) => {
-      this.#proc.kill('SIGSTOP');
+      this.#pause();
       handler(line, { ...context, isError: true });
     });
 
     proc.stdout.pipe(splitByLine()).on('data', (line) => {
-      this.#proc.kill('SIGSTOP');
+      this.#pause();
       handler(line, { ...context, isError: false });
     });
 
     proc.stderr.pipe(splitByLine()).on('data', (line) => {
-      this.#proc.kill('SIGSTOP');
+      this.#pause();
       handler(line, { ...context, isError: true });
     });
   }
 
   next() {
-    this.#proc.kill('SIGCONT');
+    this.#continue();
   }
 
   /**
@@ -84,5 +93,21 @@ export class Player {
     this.#proc.stdin.setEncoding('utf-8');
     this.#proc.stdin.write(input);
     this.#proc.stdin.end();
+  }
+
+  #pause() {
+    if (this.#pauseProcess) {
+      this.#pauseProcess(this.#proc.pid);
+    } else {
+      this.#proc.kill('SIGSTOP');
+    }
+  }
+
+  #continue() {
+    if (this.#continueProcess) {
+      this.#continueProcess(this.#proc.pid);
+    } else {
+      this.#proc.kill('SIGCONT');
+    }
   }
 }

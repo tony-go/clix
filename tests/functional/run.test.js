@@ -120,6 +120,7 @@ test('.run should append actual value in each act object', async (t) => {
     .withCode(2);
 
   const { acts } = await scenario.run();
+  console.log(scenario.acts);
   const allActs = acts.all();
 
   const allActsHaveActualProperty = allActs
