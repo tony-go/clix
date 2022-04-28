@@ -293,6 +293,7 @@ export class Scenario extends Debug {
 
   #handleData(data, { resolve, reject, isError }) {
     this.#resetTimer();
+    this.debug(this.#command, `${isError ? 'error' : 'data'} : ${data}`);
 
     const currentAct = this.#currentAct();
     if (!currentAct || currentAct.ok !== undefined) {
