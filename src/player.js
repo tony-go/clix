@@ -47,20 +47,28 @@ export class Player {
     });
 
     proc.on('exit', (code) => {
+      this.#proc.kill('SIGSTOP');
       exitHandler(code, { ...context, isError: code !== 0 });
     });
 
     proc.on('error', (line) => {
+      this.#proc.kill('SIGSTOP');
       handler(line, { ...context, isError: true });
     });
 
     proc.stdout.pipe(splitByLine()).on('data', (line) => {
+      this.#proc.kill('SIGSTOP');
       handler(line, { ...context, isError: false });
     });
 
     proc.stderr.pipe(splitByLine()).on('data', (line) => {
+      this.#proc.kill('SIGSTOP');
       handler(line, { ...context, isError: true });
     });
+  }
+
+  next() {
+    this.#proc.kill('SIGCONT');
   }
 
   /**

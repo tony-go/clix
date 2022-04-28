@@ -247,6 +247,7 @@ export class Scenario extends Debug {
         handler: this.#handleData.bind(this),
         exitHandler: this.#handleExit.bind(this),
       };
+
       this.#player.setContext(context);
 
       this.#startTimer(resolve, reject);
@@ -296,7 +297,7 @@ export class Scenario extends Debug {
     this.debug(this.#command, `${isError ? 'error' : 'data'} : ${data}`);
 
     const currentAct = this.#currentAct();
-    if (!currentAct || currentAct.ok !== undefined) {
+    if (!currentAct) {
       this.#player.stop();
       isError ? reject(new Error(data)) : resolve();
       return;
@@ -310,6 +311,7 @@ export class Scenario extends Debug {
 
     this._compare(currentAct, data);
     this.#next();
+    this.#player.next();
 
     this.#fillNextInputActs();
     this.#startTimer(resolve, reject);
