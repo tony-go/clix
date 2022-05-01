@@ -16,7 +16,22 @@ export class Player {
    */
   #context = null;
 
+  /**
+   * **Windows ONLY**
+   *
+   * @description Suspends a process given its ID.
+   * @param pid - ID of the process to suspend.
+   * @returns `true` if it succeeds or `false` if it fails.
+   */
   #pauseProcess = null;
+
+  /**
+   * **Windows ONLY**
+   *
+   * @description Resume a process given its ID.
+   * @param pid - ID of the process to resume.
+   * @returns `true` if it succeeds or `false` if it fails.
+   */
   #continueProcess = null;
 
   /**
@@ -36,17 +51,21 @@ export class Player {
     this.#context = context;
   }
 
+  #setWindowsControls() {
+    if (/^win/.test(process.platform)) {
+      const { suspend, resume } = createRequire(import.meta.url)('ntsuspend');
+      this.#pauseProcess = suspend;
+      this.#continueProcess = resume;
+    }
+  }
+
   /**
    * @param {string} command - The command to execute
    * @returns {void}
    * @description Start the player (spawn the process)
    */
   start(command) {
-    if (/^win/.test(process.platform)) {
-      const { suspend, resume } = createRequire(import.meta.url)('ntsuspend');
-      this.#pauseProcess = suspend;
-      this.#continueProcess = resume;
-    }
+    this.#setWindowsControls();
 
     // TODO(tony): check this.#context is not null
     const proc = spawn(command, { shell: true });
@@ -91,6 +110,10 @@ export class Player {
     this.#proc.stdin.end();
   }
 
+  /**
+   * @description Pause the player (child process)
+   * @returns {void}
+   */
   #pause() {
     if (this.#pauseProcess) {
       this.#pauseProcess(this.#proc.pid);
@@ -99,6 +122,10 @@ export class Player {
     }
   }
 
+  /**
+   * @description Resume the player (child process)
+   * @returns {void}
+   */
   continue() {
     if (this.#continueProcess) {
       this.#continueProcess(this.#proc.pid);
