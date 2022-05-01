@@ -5,6 +5,7 @@ interface Act<Value = string> {
   value: Value;
   ok: boolean;
   actual?: Value;
+  options?: { timeout: number };
 }
 
 interface ClixResult {
