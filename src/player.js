@@ -1,5 +1,6 @@
 import spawn from 'cross-spawn';
 import splitByLine from 'split2';
+import { createRequire } from 'module';
 
 export class Player {
   /**
@@ -14,6 +15,24 @@ export class Player {
    * @type {object.handler} function to handle data
    */
   #context = null;
+
+  /**
+   * **Windows ONLY**
+   *
+   * @description Suspends a process given its ID.
+   * @param pid - ID of the process to suspend.
+   * @returns `true` if it succeeds or `false` if it fails.
+   */
+  #pauseProcess = null;
+
+  /**
+   * **Windows ONLY**
+   *
+   * @description Resume a process given its ID.
+   * @param pid - ID of the process to resume.
+   * @returns `true` if it succeeds or `false` if it fails.
+   */
+  #continueProcess = null;
 
   /**
    * @param {void}
@@ -32,33 +51,46 @@ export class Player {
     this.#context = context;
   }
 
+  #setWindowsControls() {
+    if (/^win/.test(process.platform)) {
+      const { suspend, resume } = createRequire(import.meta.url)('ntsuspend');
+      this.#pauseProcess = suspend;
+      this.#continueProcess = resume;
+    }
+  }
+
   /**
    * @param {string} command - The command to execute
    * @returns {void}
    * @description Start the player (spawn the process)
    */
   start(command) {
+    this.#setWindowsControls();
+
     // TODO(tony): check this.#context is not null
     const proc = spawn(command, { shell: true });
-    const { handler, ...context } = this.#context;
+    const { handler, exitHandler, ...context } = this.#context;
 
     proc.on('spawn', () => {
       this.#proc = proc;
     });
 
     proc.on('exit', (code) => {
-      handler(code, { ...context, isError: code != 0 });
+      exitHandler(code, { ...context, isError: code !== 0 });
     });
 
     proc.on('error', (line) => {
+      this.#pause();
       handler(line, { ...context, isError: true });
     });
 
     proc.stdout.pipe(splitByLine()).on('data', (line) => {
+      this.#pause();
       handler(line, { ...context, isError: false });
     });
 
     proc.stderr.pipe(splitByLine()).on('data', (line) => {
+      this.#pause();
       handler(line, { ...context, isError: true });
     });
   }
@@ -76,5 +108,29 @@ export class Player {
     this.#proc.stdin.setEncoding('utf-8');
     this.#proc.stdin.write(input);
     this.#proc.stdin.end();
+  }
+
+  /**
+   * @description Pause the player (child process)
+   * @returns {void}
+   */
+  #pause() {
+    if (this.#pauseProcess) {
+      this.#pauseProcess(this.#proc.pid);
+    } else {
+      this.#proc.kill('SIGSTOP');
+    }
+  }
+
+  /**
+   * @description Resume the player (child process)
+   * @returns {void}
+   */
+  continue() {
+    if (this.#continueProcess) {
+      this.#continueProcess(this.#proc.pid);
+    } else {
+      this.#proc.kill('SIGCONT');
+    }
   }
 }

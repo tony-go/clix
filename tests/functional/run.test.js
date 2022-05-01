@@ -43,7 +43,13 @@ test('it should assert the expect value passed', async (t) => {
 
   t.ok(ok);
   t.same(acts.all(), [
-    { value: expectedValue, type: 'expect', ok: true, actual: expectedValue },
+    {
+      value: expectedValue,
+      type: 'expect',
+      ok: true,
+      actual: expectedValue,
+      options: {},
+    },
   ]);
   t.end();
 });

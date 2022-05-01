@@ -1,6 +1,6 @@
 {
   "name": "@tonygo/clix",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Write acceptance tests easily for your CLI program.",
   "main": "src/index.js",
   "type": "module",
@@ -41,6 +41,9 @@
   "dependencies": {
     "cross-spawn": "^7.0.3",
     "split2": "^4.1.0"
+  },
+  "optionalDependencies": {
+    "ntsuspend": "^1.0.2"
   },
   "tap": {
     "check-coverage": false
