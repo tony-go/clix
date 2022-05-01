@@ -42,7 +42,7 @@ export class Player {
    * @description Start the player (spawn the process)
    */
   start(command) {
-    if (process.platform === 'win32') {
+    if (/^win/.test(process.platform)) {
       const { suspend, resume } = createRequire(import.meta.url)('ntsuspend');
       this.#pauseProcess = suspend;
       this.#continueProcess = resume;
