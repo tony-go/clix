@@ -50,7 +50,7 @@ test('it should handle a timeout option', (t) => {
 test('it should throw a timeout error when time is out', async (t) => {
   class PlayerStub extends Player {
     start() {}
-    next() {}
+    continue() {}
   }
 
   const player = new PlayerStub();
@@ -77,7 +77,8 @@ test('it should not throw the timeout error', async (t) => {
     start() {
       this.#context.handler('bar', { ...this.#context, isError: false });
     }
-    next() {}
+
+    continue() {}
   }
 
   const player = new PlayerStub();

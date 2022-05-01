@@ -76,10 +76,6 @@ export class Player {
     });
   }
 
-  next() {
-    this.#continue();
-  }
-
   /**
    * @param {string} input - The input to send to the player
    * @returns {void}
@@ -103,7 +99,7 @@ export class Player {
     }
   }
 
-  #continue() {
+  continue() {
     if (this.#continueProcess) {
       this.#continueProcess(this.#proc.pid);
     } else {

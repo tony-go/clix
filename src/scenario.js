@@ -311,7 +311,7 @@ export class Scenario extends Debug {
 
     this._compare(currentAct, data);
     this.#next();
-    this.#player.next();
+    this.#player.continue();
 
     this.#fillNextInputActs();
     this.#startTimer(resolve, reject);
