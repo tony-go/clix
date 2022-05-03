@@ -3,14 +3,14 @@ import { test } from 'tap';
 import clix from '../../src/index.js';
 
 test('it should expose a _buildResult method as public', (t) => {
-  const scenario = clix('my-command');
+  const scenario = clix('my-command').build();
 
   t.ok(scenario._buildResult);
   t.end();
 });
 
 test('_buildResult should return an .ok property', (t) => {
-  const scenario = clix('my-command');
+  const scenario = clix('my-command').build();
 
   const { ok } = scenario._buildResult();
 
@@ -21,7 +21,7 @@ test('_buildResult should return an .ok property', (t) => {
 test('_buildResult should return a .acts property within an .all property', (t) => {
   const scenario = clix('my-command');
 
-  const { acts } = scenario._buildResult();
+  const { acts } = scenario.build()._buildResult();
 
   t.equal(typeof acts.all, 'function');
   t.end();
@@ -32,7 +32,8 @@ test('acts.all should return all acts', (t) => {
   const scenario = clix('my-command')
     .expect('foo')
     .input('bar')
-    .expectError('baz');
+    .expectError('baz')
+    .build();
 
   // when
   const { acts } = scenario._buildResult();
@@ -48,7 +49,9 @@ test('acts.last should return the last act that failed', (t) => {
   const scenario = clix('my-command')
     .expect('foo')
     .input('bar')
-    .expectError('baz');
+    .expectError('baz')
+    .build();
+
   scenario.acts[0].ok = false; // simulate .run() call
 
   // when
@@ -65,7 +68,9 @@ test('acts.last should return the last act if nothing failed', (t) => {
   const scenario = clix('my-command')
     .expect('foo')
     .input('bar')
-    .expectError('baz');
+    .expectError('baz')
+    .build();
+
   const res = scenario._buildResult();
 
   // when

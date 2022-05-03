@@ -1,24 +1,27 @@
 import { test } from 'tap';
 
-import clix, { Scenario } from '../../../src/index.js';
+import clix from '../../../src/index.js';
 import { kActType } from '../../../src/constant.js';
+import { ScenarioBuilder } from '../../../src/scenario-builder.js';
 
 test('it should expose an input function to add an expected value', (t) => {
-  const scenario = clix('foo bar');
+  const scenarioBuilder = clix('foo bar');
   const inputValue = 'hey';
 
-  scenario.input(inputValue);
+  scenarioBuilder.input(inputValue);
+  const scenario = scenarioBuilder.build();
 
   t.same(scenario.acts, [{ value: inputValue, type: kActType.input }]);
   t.end();
 });
 
 test('it should expose an input function to add an several expected Values', (t) => {
-  const scenario = clix('foo bar');
+  const scenarioBuilder = clix('foo bar');
   const inputA = 'hey';
   const inputB = 'yo';
 
-  scenario.input([inputA, inputB]);
+  scenarioBuilder.input([inputA, inputB]);
+  const scenario = scenarioBuilder.build();
 
   t.same(scenario.acts, [
     { value: inputA, type: kActType.input },
@@ -28,8 +31,8 @@ test('it should expose an input function to add an several expected Values', (t)
 });
 
 test('it should allow chaining with input method', (t) => {
-  const scenario = clix('foo bar').input('yo').input('foo');
+  const scenarioBuilder = clix('foo bar').input('yo').input('foo');
 
-  t.ok(scenario instanceof Scenario);
+  t.ok(scenarioBuilder instanceof ScenarioBuilder);
   t.end();
 });

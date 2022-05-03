@@ -1,14 +1,16 @@
 import { test } from 'tap';
 
-import clix, { Scenario } from '../../../src/index.js';
+import clix from '../../../src/index.js';
 import { kActType } from '../../../src/constant.js';
 import { Player } from '../../../src/player.js';
+import { ScenarioBuilder } from '../../../src/scenario-builder.js';
 
 test('it expectError function could add expected errors', (t) => {
-  const scenario = clix('foo bar');
+  const scenarioBuilder = clix('foo bar');
 
   const error = 'error';
-  scenario.expectError(error);
+  scenarioBuilder.expectError(error);
+  const scenario = scenarioBuilder.build();
 
   t.same(scenario.acts, [
     {
@@ -21,28 +23,30 @@ test('it expectError function could add expected errors', (t) => {
 });
 
 test('it expectError could take an array of string', (t) => {
-  const scenario = clix('foo bar');
+  const scenarioBuilder = clix('foo bar');
   const errorA = 'boom';
   const errorB = 'paf';
 
-  scenario.expectError([errorA, errorB]);
+  scenarioBuilder.expectError([errorA, errorB]);
+  const scenario = scenarioBuilder.build();
 
   t.same(scenario.acts, [
-    { value: errorA, type: kActType.expectError, options: {} },
-    { value: errorB, type: kActType.expectError, options: {} },
+    { value: errorA, type: kActType.expectError },
+    { value: errorB, type: kActType.expectError },
   ]);
   t.end();
 });
 
 test('it should allow chaining with input method', (t) => {
-  const scenario = clix('foo bar').expectError('yo').expectError('foo');
+  const scenarioBuilder = clix('foo bar').expectError('yo').expectError('foo');
 
-  t.ok(scenario instanceof Scenario);
+  t.ok(scenarioBuilder instanceof ScenarioBuilder);
   t.end();
 });
 
 test('it should handle a timeout option', (t) => {
-  const scenario = clix('foo').expectError('bar', { timeout: 3000 });
+  const scenarioBuilder = clix('foo').expectError('bar', { timeout: 3000 });
+  const scenario = scenarioBuilder.build();
 
   t.same(scenario.acts, [
     { value: 'bar', type: kActType.expectError, options: { timeout: 3000 } },
@@ -58,12 +62,13 @@ test('it should throw a timeout error when time is out', async (t) => {
   }
 
   const player = new PlayerStub();
-  const scenario = new Scenario('foo', player).expectError('bar', {
-    timeout: 5,
-  });
+  const scenarioBuilder = new ScenarioBuilder()
+    .withCommand('foo')
+    .withPlayer(player)
+    .expectError('bar', { timeout: 5 });
 
   try {
-    await scenario.run();
+    await scenarioBuilder.run();
     t.ok(false);
   } catch (e) {
     t.ok(e.message);
@@ -88,11 +93,12 @@ test('it should not throw the timeout error', async (t) => {
   }
 
   const player = new PlayerStub();
-  const scenario = new Scenario('foo', player).expectError('bar', {
-    timeout: 5,
-  });
+  const scenarioBuilder = new ScenarioBuilder()
+    .withCommand('foo')
+    .withPlayer(player)
+    .expectError('bar', { timeout: 5 });
 
-  await scenario.run();
+  await scenarioBuilder.run();
 
   t.end();
 });

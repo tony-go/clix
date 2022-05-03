@@ -10,7 +10,7 @@ afterEach(() => {
 });
 
 test('it should expose a compare function', (t) => {
-  const scenario = clix('test');
+  const scenario = clix('test').build();
 
   t.equal(typeof scenario._compare, 'function');
   t.end();
@@ -23,7 +23,7 @@ test('it should set currentAct.ok to true if values are equal', (t) => {
   };
   const equalBufferValue = 'foo';
 
-  clix('test')._compare(act, equalBufferValue);
+  clix('test').build()._compare(act, equalBufferValue);
 
   t.ok(act.ok);
   t.end();
@@ -36,7 +36,7 @@ test('it should set currentAct.ok to false if values are not equal', (t) => {
   };
   const notEqualBufferValue = 'zoo';
 
-  clix('test')._compare(act, notEqualBufferValue);
+  clix('test').build()._compare(act, notEqualBufferValue);
 
   t.notOk(act.ok);
   t.end();
@@ -49,7 +49,7 @@ test('it should add an actual property to the current act within buffer value', 
   };
   const equalBufferValue = 'foo';
 
-  clix('test')._compare(act, equalBufferValue);
+  clix('test').build()._compare(act, equalBufferValue);
 
   t.equal(act.actual, equalBufferValue);
   t.end();
@@ -64,7 +64,7 @@ test('it should call debug method with expected and actual value', (t) => {
   };
   const equalBufferValue = 'foo';
 
-  clix('test')._compare(act, equalBufferValue);
+  clix('test').build()._compare(act, equalBufferValue);
 
   t.equal(debugSpy.calls.length, 1);
   const consoleArguments = debugSpy.calls.at(0).at(1);
