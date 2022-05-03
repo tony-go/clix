@@ -1,4 +1,4 @@
-import { Scenario } from './scenario.js';
+import { ScenarioBuilder } from './scenario-builder.js';
 
 export function clix(command) {
   if (typeof command !== 'string') {
@@ -9,5 +9,5 @@ export function clix(command) {
     throw new Error('Command should not be an empty string');
   }
 
-  return new Scenario(command);
+  return new ScenarioBuilder().withCommand(command);
 }
