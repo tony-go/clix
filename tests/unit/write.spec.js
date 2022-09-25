@@ -1,5 +1,5 @@
 import { test } from 'tap';
-import { Scenario } from '../../src/index.js';
+import { ScenarioBuilder } from '../../src/scenario-builder.js';
 
 class PlayerStub {
   lastInput = null;
@@ -11,22 +11,29 @@ class PlayerStub {
 
 test('_writeInProc add a \n if the input does not contain it', (t) => {
   const player = new PlayerStub();
-  const scenario = new Scenario('random command', player);
+  const scenario = new ScenarioBuilder()
+    .withCommand('random command')
+    .withPlayer(player)
+    .build();
 
-  const input = 'What is your name?';
-  scenario._writeInProc(input);
+  const inputWithoutBackslachN = 'What is your name?';
+  scenario._writeInProc(inputWithoutBackslachN);
 
-  t.equal(player.lastInput, 'What is your name?\n');
+  const inputWithBackSlachN ='What is your name?\n' 
+  t.equal(player.lastInput, inputWithBackSlachN);
   t.end();
 });
 
 test('_writeInProc should not add if it is already in the input', (t) => {
   const player = new PlayerStub();
-  const scenario = new Scenario('random command', player);
+  const scenario = new ScenarioBuilder()
+    .withCommand('random command')
+    .withPlayer(player)
+    .build();
 
-  const input = 'What is your name?\n';
-  scenario._writeInProc(input);
+  const inputWithBackSlachN ='What is your name?\n' 
+  scenario._writeInProc(inputWithBackSlachN);
 
-  t.equal(player.lastInput, 'What is your name?\n');
+  t.equal(player.lastInput, inputWithBackSlachN); 
   t.end();
 });
