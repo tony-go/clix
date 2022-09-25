@@ -68,3 +68,28 @@ To see all the internal logs used in `clix`, set the DEBUG environment variable 
 ```
 DEBUG=1 <your-command>
 ```
+
+## Release
+
+We have a workflow in the CI responsible for packages releases (`.gihtub/workflows/publish.yml`).
+
+### How to trigger a release ?
+
+You have to:
+* Bump the version in the `package.json`
+* Add a tag to the last commit.
+```bash
+$ git tag <version>
+```
+* Push the tag
+```bash
+$  git push --tags
+```
+* Go to github repository interface and visit the release [page](https://github.com/tony-go/clix/releases)
+* Click on "Draft a new release button", then:
+  * Choose the tag you just pushed
+  * Write a title (the version)
+  * Write a description in the proper way, please look at old release if you need a model.
+  * Click on "Publish Release" button
+* You should find a new "publish" workflow in the [actions section](https://github.com/tony-go/clix/actions/workflows/publish.yml)
+

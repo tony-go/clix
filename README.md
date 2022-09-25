@@ -66,7 +66,10 @@ assert.ok(result_2.ok);
 
 ## 🗺 Road map
 
-> TODO
+| Item                      | Status  | Notes                                                    |
+| ------------------------- | ------  | -------------------------------------------------------- |
+| `.select` API             | ABORTED | Findings here: https://github.com/tony-go/clix/issues/16 |
+| `.skip(numberOfLines)`API | TODO    | -------------------------------------------------------- | 
 
 ## 📖 API
 
@@ -105,14 +108,6 @@ interface ExpectErrorOptions {
 ### **scenario.input(input: string): Clix**
 
 Emulate an interaction with the CLI and returns the Clix instance.
-
-### **scenario.select(input: number[]): Clix** (TODO)
-
-Emulate an interaction with a list (single or multiple choice) and returns the Clix instance.
-
-### **scenario.skip(numberOfLines: number): Clix** (TODO)
-
-Skip one or more lines and returns the Clix Instance.
 
 ### **async scenario.run(): Promise<ClixResult>**
 
