@@ -1,6 +1,7 @@
 import { test } from 'tap';
 
-import clix, { Scenario } from '../../src/index.js';
+import clix from '../../src/index.js';
+import { ScenarioBuilder } from '../../src/scenario-builder.js';
 
 test('it should expose a function', (t) => {
   t.ok(clix instanceof Function);
@@ -34,11 +35,11 @@ test('it should throw an error if command is an empty string', (t) => {
   t.end();
 });
 
-test('it should return a Scenario instance if command type is valid', (t) => {
+test('it should return a ScenarioBuilder instance if command type is valid', (t) => {
   const validCommand = 'bash ./fixtures/basic';
 
   const res = clix(validCommand);
 
-  t.ok(res instanceof Scenario);
+  t.ok(res instanceof ScenarioBuilder);
   t.end();
 });

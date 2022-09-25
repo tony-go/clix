@@ -1,6 +1,6 @@
 {
   "name": "@tonygo/clix",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Write acceptance tests easily for your CLI program.",
   "main": "src/index.js",
   "type": "module",

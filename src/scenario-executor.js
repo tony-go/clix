@@ -7,7 +7,7 @@ import { TimeoutError } from './errors.js';
 // constants
 const kDefaultTimeout = 500;
 
-export class Scenario extends Debug {
+export class ScenarioExecutor extends Debug {
   /**
    * @type {string}
    * @description the command to run
@@ -38,10 +38,10 @@ export class Scenario extends Debug {
    */
   #timer = null;
 
-  constructor(command, player = new Player()) {
+  constructor(command, acts = [], player = new Player()) {
     super(command);
     this.#command = command;
-    this.acts = [];
+    this.acts = acts;
     this.#player = player;
   }
 
@@ -50,74 +50,6 @@ export class Scenario extends Debug {
    * // PUBLIC API METHODS //
    * ////////////////////////
    */
-
-  /**
-   * Allow user to declare an expected output
-   * @param {string} value
-   * @param {Array<string>} value
-   * @returns {Scenario}
-   */
-  expect(value, options = {}) {
-    if (typeof value === 'string') {
-      this.#addExpectAct(value, options);
-    } else if (Array.isArray(value)) {
-      for (const act of value) {
-        // todo(tony): add support for options
-        this.#addExpectAct(act);
-      }
-    }
-
-    return this;
-  }
-
-  /**
-   * Allows to simulate a user input
-   * @param {String} value
-   * @param {Array<String>} value
-   * @returns {Scenario}
-   */
-  input(value) {
-    if (typeof value === 'string') {
-      this.#addInputAct(value);
-    } else if (Array.isArray(value)) {
-      for (const input of value) {
-        this.#addInputAct(input);
-      }
-    }
-
-    return this;
-  }
-
-  /**
-   * Allow user to declare an expected error
-   * @param {String} error
-   * @param {Array<String>} error
-   * @returns {Scenario}
-   */
-  expectError(error, options = {}) {
-    if (Array.isArray(error)) {
-      for (const err of error) {
-        // todo(tony): add support for options
-        this.#addExpectErrorAct(err);
-      }
-    } else {
-      this.#addExpectErrorAct(error, options);
-    }
-
-    return this;
-  }
-
-  /**
-   * Allow user to declare an expected exit code
-   * @param {Number} code
-   * @returns {Scenario}
-   */
-  withCode(code) {
-    const act = { value: code, type: kActType.exitCode };
-    this.acts.push(act);
-
-    return this;
-  }
 
   /**
    * Allows user to execute the scenario
@@ -191,33 +123,6 @@ export class Scenario extends Debug {
    * // PRIVATE METHODS //
    * /////////////////////
    */
-
-  /**
-   * Add 'expect' act to the scenario
-   * @param {string} value - value to add in the scenario
-   */
-  #addExpectAct(value, options = {}) {
-    const act = { value, type: kActType.expect, options };
-    this.acts.push(act);
-  }
-
-  /**
-   * Add 'input' act to the scenario
-   * @param {string} value - input to add in the scenario
-   */
-  #addInputAct(input) {
-    const act = { value: input, type: kActType.input };
-    this.acts.push(act);
-  }
-
-  /**
-   * Add 'expect-error' act to the scenario
-   * @param {string} value - value to add in the scenario
-   */
-  #addExpectErrorAct(value, options = {}) {
-    const errorAct = { value, type: kActType.expectError, options };
-    this.acts.push(errorAct);
-  }
 
   /**
    * Find the first failed act from this.acts
