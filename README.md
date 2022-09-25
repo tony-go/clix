@@ -66,10 +66,10 @@ assert.ok(result_2.ok);
 
 ## 🗺 Road map
 
-| Item                      | Status  | Notes                                                    |
-| ------------------------- | ------  | -------------------------------------------------------- |
-| `.select` API             | ABORTED | Findings here: https://github.com/tony-go/clix/issues/16 |
-| `.skip(numberOfLines)`API | TODO    | -------------------------------------------------------- | 
+| Item | Status              | Notes' |
+|-----------|-------------------|-----------------|
+| `.select` API     | ABORTED |  Findings here: https://github.com/tony-go/clix/issues/16 |
+| `.skip(numberOfLines)` PI     | TODO |  |
 
 ## 📖 API
 
