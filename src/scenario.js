@@ -7,7 +7,7 @@ import { TimeoutError } from './errors.js';
 // constants
 const kDefaultTimeout = 500;
 
-export class Scenario extends Debug {
+export class ScenarioExecutor extends Debug {
   /**
    * @type {string}
    * @description the command to run

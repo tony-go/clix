@@ -16,10 +16,11 @@ test('_writeInProc add a \n if the input does not contain it', (t) => {
     .withPlayer(player)
     .build();
 
-  const input = 'What is your name?';
-  scenario._writeInProc(input);
+  const inputWithoutBackslachN = 'What is your name?';
+  scenario._writeInProc(inputWithoutBackslachN);
 
-  t.equal(player.lastInput, 'What is your name?\n');
+  const inputWithBackSlachN ='What is your name?\n' 
+  t.equal(player.lastInput, inputWithBackSlachN);
   t.end();
 });
 
@@ -30,9 +31,9 @@ test('_writeInProc should not add if it is already in the input', (t) => {
     .withPlayer(player)
     .build();
 
-  const input = 'What is your name?\n';
-  scenario._writeInProc(input);
+  const inputWithBackSlachN ='What is your name?\n' 
+  scenario._writeInProc(inputWithBackSlachN);
 
-  t.equal(player.lastInput, 'What is your name?\n');
+  t.equal(player.lastInput, inputWithBackSlachN); 
   t.end();
 });

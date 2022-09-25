@@ -1,6 +1,6 @@
 import { kActType } from './constant.js';
 import { Player } from './player.js';
-import { Scenario } from './scenario.js';
+import { ScenarioExecutor } from './scenario.js';
 
 export class ScenarioBuilder {
   #acts = [];
@@ -99,7 +99,7 @@ export class ScenarioBuilder {
   }
 
   build() {
-    return new Scenario(
+    return new ScenarioExecutor(
       this.#command,
       this.#acts ?? [],
       this.#player ?? new Player()
