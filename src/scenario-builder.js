@@ -1,6 +1,6 @@
 import { kActType } from './constant.js';
 import { Player } from './player.js';
-import { ScenarioExecutor } from './scenario.js';
+import { ScenarioExecutor } from './scenario-executor.js';
 
 export class ScenarioBuilder {
   #acts = [];
