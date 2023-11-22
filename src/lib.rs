@@ -5,6 +5,7 @@ extern crate napi_derive;
 
 use napi::bindgen_prelude::{FromNapiValue, ToNapiValue};
 use napi::Either;
+use rexpect::error::Error;
 use rexpect::spawn_bash;
 
 use std::string::String;
@@ -91,32 +92,62 @@ impl Scenario {
 
   #[napi]
   pub async fn run(&self) -> ScenarioResult {
-    // let p = spawn_bash(Some(self.timeout.into()));
-    // match p {
-    //   Ok(mut proc) => match self.acts[0].kind {
-    //     ActKind::Expect => {
-    //       proc.send_line(&self.command).unwrap();
-    //       // proc.exp_string(&self.acts[0].expected.to_string()).unwrap();
-    //       proc.wait_for_prompt().unwrap();
-    //       let op = proc.read_line();
-    //       println!("op: {:?}", op);
-    //     }
-    //     ActKind::ExpectError => {}
-    //     ActKind::ExitCode => {}
-    //     ActKind::Input => {}
-    //   },
-    //   Err(e) => {
-    //     println!("Error: {}", e);
-    //   }
-    // }
+    let mut act_pointer = 0;
+    let mut p = spawn_bash(Some(self.timeout.into())).unwrap();
 
-    // p.wait_for_prompt();
-    // let op = p.read_line();
-    // println!("op: {:?}", op);
-    // your implementation here
-    // return a Result indicating either success with ClixResult
-    // or failure with some error type
-    ScenarioResult { ok: true }
+    p.send_line(self.command.as_str()).unwrap();
+
+    let mut ok = false;
+    loop {
+      match p.exp_regex(".+") {
+        Ok(matched) => {
+          let actual = matched.1.trim();
+          let current_act = &self.acts[act_pointer];
+          match current_act.kind {
+            ActKind::Expect => match current_act.expected {
+              // String
+              Either::A(ref expected_str) => {
+                if actual == expected_str.to_string().trim() {
+                  ok = true;
+                }
+              }
+              // Vector of strings
+              Either::B(ref expected_int) => {
+                if actual == expected_int.to_string().trim() {
+                  ok = true;
+                }
+              }
+            },
+            _ => {}
+          }
+          act_pointer += 1;
+          break;
+        }
+        Err(e) => {
+          match e {
+            Error::EOF {
+              expected,
+              got,
+              exit_code,
+            } => {
+              println!(
+                "EOF reached. Expected: '{}', got: '{}', exit code: {:?}",
+                expected, got, exit_code
+              );
+              break;
+            }
+            // Handle other specific errors or a general case
+            _ => {
+              println!("Error encountered: {:?}", e);
+              ok = false;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    ScenarioResult { ok }
   }
 }
 

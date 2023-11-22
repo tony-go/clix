@@ -2,10 +2,10 @@ import test from 'ava'
 
 import { clix } from '../index.js'
 
-test('clix function expose a run method', async (t) => {
-  const scenario = clix("./script.sh", 1000);
+test('clix should be able to expect a string', async t => {
+  const scenario = clix("./__test__/script.sh", 1000);
 
-  scenario.expect("echo Hello, who am I talking to?");
+  scenario.expect("Hello, who am I talking to?");
 
   const res = await scenario.run();
 
