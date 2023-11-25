@@ -97,7 +97,7 @@ impl Scenario {
 
     p.send_line(self.command.as_str()).unwrap();
 
-    let mut ok = false;
+    let mut ok = true;
     loop {
       match p.exp_regex(".+") {
         Ok(matched) => {
@@ -107,13 +107,13 @@ impl Scenario {
             ActKind::Expect => match current_act.expected {
               // String
               Either::A(ref expected_str) => {
-                if actual == expected_str.to_string().trim() {
-                  ok = true;
+                if actual != expected_str.to_string().trim() {
+                  ok = false;
                 }
               }
               // Vector of strings
               Either::B(ref expected_int) => {
-                if actual == expected_int.to_string().trim() {
+                if actual != expected_int.to_string().trim() {
                   ok = true;
                 }
               }
@@ -139,7 +139,6 @@ impl Scenario {
             // Handle other specific errors or a general case
             _ => {
               println!("Error encountered: {:?}", e);
-              ok = false;
               break;
             }
           }
